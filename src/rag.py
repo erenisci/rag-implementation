@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_chroma import Chroma
@@ -7,6 +10,8 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 import config
 
 
+load_dotenv()
+
 embedding_model = OpenAIEmbeddings(model=config.EMBEDDING_MODEL)
 vector_db = Chroma(
     collection_name=config.COLLECTION_NAME,
@@ -14,7 +19,9 @@ vector_db = Chroma(
     persist_directory="data/chroma_db",
 )
 
-llm = ChatOpenAI(model=config.GPT_MODEL, temperature=0.7)
+llm = ChatOpenAI(
+    model=config.GPT_MODEL, api_key=os.getenv("OPENAI_API_KEY"), temperature=0.7
+)
 
 retriever = vector_db.as_retriever(search_kwargs={"k": 3})
 
