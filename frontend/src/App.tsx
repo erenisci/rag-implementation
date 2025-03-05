@@ -18,6 +18,7 @@ const App: React.FC = () => {
     MODEL: 'gpt-3.5-turbo',
     SYSTEM_PROMPT: '',
   });
+  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
 
   useEffect(() => {
     fetchSettings();
@@ -32,6 +33,10 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSendMessage = (message: { text: string; sender: 'user' | 'ai' }) => {
+    setMessages(prevMessages => [...prevMessages, message]);
+  };
+
   return (
     <div className='flex h-screen bg-stone-900 text-stone-200'>
       <Sidebar
@@ -40,7 +45,7 @@ const App: React.FC = () => {
       />
       <div className='flex-1 flex flex-col'>
         {/* Header */}
-        <div className='flex justify-between items-center bg-stone-800 p-4 text-stone-100'>
+        <div className='flex justify-between items-center bg-stone-800 p-4 text-stone-200'>
           <button onClick={() => setSidebarOpen(true)}>
             {!sidebarOpen ? <FaBars size={20} /> : ' '}
           </button>
@@ -56,10 +61,10 @@ const App: React.FC = () => {
         </div>
 
         {/* Chat Messages */}
-        <ChatMessages />
+        <ChatMessages messages={messages} />
 
         {/* Input Field */}
-        <InputField />
+        <InputField onSendMessage={handleSendMessage} />
       </div>
 
       {/* PDF Modal */}

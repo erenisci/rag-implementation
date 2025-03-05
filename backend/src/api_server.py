@@ -4,10 +4,15 @@ import shutil
 import chromadb
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from src.embedding import store_embeddings_in_chromadb
 from src.preprocessing import process_all_pdfs
 from src.rag import ask_question
 from src.settings import load_settings, save_settings, settings
+
+
+class QuestionRequest(BaseModel):
+    question: str
 
 
 app = FastAPI()
@@ -29,9 +34,9 @@ def status():
 
 
 @app.post("/ask/")
-def ask(question: str):
+def ask(request: QuestionRequest):
     """Processes a question using the document retrieval system and returns an answer."""
-    answer = ask_question(question)
+    answer = ask_question(request.question)
     return {"answer": answer}
 
 
