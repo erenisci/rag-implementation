@@ -1,9 +1,10 @@
 import json
 import os
+
 from dotenv import load_dotenv, set_key
 
 
-load_dotenv(override=True)  # Ensure environment variables are loaded
+load_dotenv(override=True)
 
 SETTINGS_FILE = "settings/settings.json"
 ENV_FILE = ".env"
@@ -13,12 +14,12 @@ def load_settings():
     """Loads the latest configuration from settings.json and .env dynamically."""
     settings = {}
 
-    # JSON dosyasını her seferinde yeniden oku
+    # Read the JSON file
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, "r", encoding="utf-8") as file:
             settings.update(json.load(file))
 
-    # .env dosyasından API_KEY çek
+    # Load API_KEY from .env file
     settings["API_KEY"] = os.getenv("API_KEY", "")
 
     return settings

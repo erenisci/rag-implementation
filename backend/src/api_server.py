@@ -45,6 +45,8 @@ def get_settings():
 def update_settings(updated_settings: dict):
     """Updates settings and ensures latest values are available."""
     save_settings(updated_settings)
+    global settings
+    settings = load_settings()
     return {"message": "Settings updated successfully!"}
 
 
@@ -120,8 +122,16 @@ def delete_pdf(file_name: str):
     try:
         client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
         vector_db = client.get_or_create_collection(name=settings["COLLECTION_NAME"])
-        vector_db.delete(where={"pdf_name": pdf_name})
-        print(f"Embeddings for {pdf_name} deleted successfully from ChromaDB.")
+
+        vector_db.delete(where={"source": {"$eq": f"{pdf_name}/"}})
+        vector_db.delete(where={"pdf_name": {"$eq": pdf_name}})
+
+        remaining = vector_db.get(where={"pdf_name": {"$eq": pdf_name}})
+        if remaining["ids"]:
+            print(f"Warning: Some embeddings for {pdf_name} still exist in ChromaDB!")
+        else:
+            print(f"All embeddings for {pdf_name} successfully removed from ChromaDB.")
+
     except Exception as e:
         print(f"Warning: Could not delete embeddings for {pdf_name}: {e}")
 

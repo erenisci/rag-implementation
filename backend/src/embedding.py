@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 import chromadb
@@ -8,9 +9,17 @@ client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
 
 
 def get_vector_db():
-    """Koleksiyonun var olup olmadığını kontrol et ve oluştur."""
+    """Check if the collection exists and create it if necessary."""
     try:
+        collections = client.list_collections()
+        if settings["COLLECTION_NAME"] in collections:
+            return client.get_collection(name=settings["COLLECTION_NAME"])
+
+        print(
+            f"Warning: Collection '{settings['COLLECTION_NAME']}' not found. Creating a new one."
+        )
         return client.get_or_create_collection(name=settings["COLLECTION_NAME"])
+
     except Exception as e:
         print(f"Error getting ChromaDB collection: {e}")
         return None
@@ -55,8 +64,12 @@ def store_embeddings_in_chromadb():
         return
 
     for i, chunk in enumerate(chunks):
+        unique_id = hashlib.md5(
+            (pdf_names[i] + file_names[i] + chunk[:20]).encode()
+        ).hexdigest()
+
         vector_db.add(
-            ids=[str(i)],
+            ids=[unique_id],
             documents=[chunk],
             metadatas=[{"source": file_names[i], "pdf_name": pdf_names[i]}],
         )
