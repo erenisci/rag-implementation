@@ -2,12 +2,14 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
+interface Settings {
+  API_KEY: string;
+  MODEL: string;
+  SYSTEM_PROMPT: string;
+}
+
 interface SettingsModalProps {
-  settings: {
-    API_KEY: string;
-    MODEL: string;
-    SYSTEM_PROMPT: string;
-  };
+  settings: Settings;
   setSettings: (settings: { API_KEY: string; MODEL: string; SYSTEM_PROMPT: string }) => void;
   setSettingsOpen: (open: boolean) => void;
   fetchSettings: () => Promise<void>;
@@ -19,7 +21,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   setSettingsOpen,
   fetchSettings,
 }) => {
-  const [localSettings, setLocalSettings] = useState(settings);
+  const [localSettings, setLocalSettings] = useState<Settings>(settings);
   const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
@@ -28,13 +30,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const updateSettings = async () => {
     try {
+      const trimmedSettings = {
+        API_KEY: localSettings.API_KEY.replace(/^\s+|\s+$/g, ''),
+        MODEL: localSettings.MODEL.replace(/^\s+|\s+$/g, ''),
+        SYSTEM_PROMPT: localSettings.SYSTEM_PROMPT.replace(/^\s+|\s+$/g, ''),
+      };
+      setLocalSettings(trimmedSettings);
+      setSettings(trimmedSettings);
+
       await axios.post('http://127.0.0.1:8000/update-settings/', localSettings, {
         headers: { 'Content-Type': 'application/json' },
       });
 
       alert('Settings updated successfully!');
       await fetchSettings();
-      setSettings(localSettings);
+
       setSettingsOpen(false);
     } catch (error) {
       console.error('Error updating settings:', error);
@@ -77,7 +87,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <label className='block mb-2'>
           System Prompt:
           <textarea
-            className='w-full p-3 bg-stone-700 rounded mt-1 h-32'
+            className='w-full p-3 bg-stone-700 rounded mt-1 h-32 resize-none overflow-y-auto'
             value={localSettings.SYSTEM_PROMPT}
             onChange={e => setLocalSettings({ ...localSettings, SYSTEM_PROMPT: e.target.value })}
           />
