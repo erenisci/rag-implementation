@@ -3,30 +3,28 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from src.embedding import client
 from src.settings import settings
 
 
-# Check if API Key exists
 openai_api_key = settings.get("API_KEY", "")
 
 if not openai_api_key:
     print("Warning: No OpenAI API Key set. Model will not be initialized.")
     llm = None
-    embedding_model = None
     retriever = None
     chain = None
 else:
-    embedding_model = OpenAIEmbeddings(
-        model=settings["EMBEDDING_MODEL"], openai_api_key=openai_api_key
-    )
+    embedding_model = OpenAIEmbeddings(model=settings["EMBEDDING_MODEL"], openai_api_key=openai_api_key)
 
     vector_db = Chroma(
+        client=client,
         collection_name=settings["COLLECTION_NAME"],
-        persist_directory=settings["CHROMA_DB_DIR"],
-        embedding_function=embedding_model,
+        embedding_function=embedding_model
     )
 
     retriever = vector_db.as_retriever(search_kwargs={"k": 3})
+
     llm = ChatOpenAI(model=settings["MODEL"], api_key=openai_api_key, temperature=0.7)
 
     prompt = ChatPromptTemplate.from_messages(
@@ -38,7 +36,6 @@ else:
 
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
     chain = create_retrieval_chain(retriever, question_answer_chain)
-
 
 def ask_question(question):
     """Handles question processing only if the model is initialized."""

@@ -1,35 +1,39 @@
 import hashlib
 import os
+import shutil
 
 import chromadb
+from chromadb.utils import embedding_functions
 from src.settings import settings
 
 
+openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+    api_key=settings["API_KEY"],
+    model_name=settings["EMBEDDING_MODEL"]
+)
+
 client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
 
-
 def get_vector_db():
-    """Check if the collection exists and create it if necessary."""
+    """Gets or creates an existing ChromaDB collection."""
     try:
-        collections = client.list_collections()
-        if settings["COLLECTION_NAME"] in collections:
-            return client.get_collection(name=settings["COLLECTION_NAME"])
-
-        print(
-            f"Warning: Collection '{settings['COLLECTION_NAME']}' not found. Creating a new one."
+        collection = client.get_collection(
+            name=settings["COLLECTION_NAME"], 
+            embedding_function=openai_ef 
         )
-        return client.get_or_create_collection(name=settings["COLLECTION_NAME"])
-
+        print(f"Loaded ChromaDB collection: {collection.name}")
+        return collection
     except Exception as e:
-        print(f"Error getting ChromaDB collection: {e}")
-        return None
-
+        print(f"Error accessing ChromaDB collection: {e}. Creating a new one.")
+        return client.get_or_create_collection(
+            name=settings["COLLECTION_NAME"],
+            embedding_function=openai_ef 
+        )
 
 vector_db = get_vector_db()
 
-
 def load_text_chunks():
-    """Loads text chunks from separate folders inside the processed directory."""
+    """Loads text chunks from processed directories."""
     chunks = []
     file_names = []
     pdf_names = []
@@ -48,9 +52,8 @@ def load_text_chunks():
 
     return chunks, file_names, pdf_names
 
-
 def store_embeddings_in_chromadb():
-    """Generates embeddings for text chunks and stores them in ChromaDB."""
+    """Stores text chunks as embeddings."""
     global vector_db
     vector_db = get_vector_db()
 
@@ -75,3 +78,43 @@ def store_embeddings_in_chromadb():
         )
 
     print(f"{len(chunks)} new chunks added to ChromaDB!")
+
+def delete_pdf_embeddings(pdf_name):
+    """Deletes all embeddings related to a specific PDF from ChromaDB."""
+    global vector_db
+    vector_db = get_vector_db()
+
+    if vector_db is None:
+        print("ChromaDB collection not found. Skipping deletion.")
+        return
+
+    all_embeddings = vector_db.get()
+
+    ids_to_delete = [
+        doc_id for doc_id, metadata in zip(all_embeddings["ids"], all_embeddings["metadatas"])
+        if metadata["pdf_name"] == pdf_name
+    ]
+
+    if ids_to_delete:
+        vector_db.delete(ids=ids_to_delete)
+        print(f"Deleted {len(ids_to_delete)} embeddings related to {pdf_name}")
+    else:
+        print(f"No embeddings found for {pdf_name}")
+
+
+def reset_chroma_db():
+    """Resets ChromaDB and recreates the collection."""
+    if os.path.exists(settings["CHROMA_DB_DIR"]):
+        shutil.rmtree(settings["CHROMA_DB_DIR"], ignore_errors=True)
+
+    os.makedirs(settings["CHROMA_DB_DIR"], exist_ok=True)
+
+    global client
+    client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
+    global vector_db
+    vector_db = client.get_or_create_collection(
+        name=settings["COLLECTION_NAME"],
+        embedding_function=openai_ef 
+    )
+
+    print("ChromaDB reset and collection recreated.")

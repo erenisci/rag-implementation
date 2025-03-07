@@ -1,11 +1,11 @@
 import os
 import shutil
 
-import chromadb
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from src.embedding import store_embeddings_in_chromadb
+from src.embedding import (delete_pdf_embeddings, reset_chroma_db,
+                           store_embeddings_in_chromadb)
 from src.preprocessing import process_all_pdfs
 from src.rag import ask_question
 from src.settings import load_settings, save_settings, settings
@@ -49,6 +49,10 @@ def get_settings():
 @app.post("/update-settings/")
 def update_settings(updated_settings: dict):
     """Updates settings and ensures latest values are available."""
+    updated_settings["API_KEY"] = updated_settings["API_KEY"].strip()
+    updated_settings["MODEL"] = updated_settings["MODEL"].strip()
+    updated_settings["SYSTEM_PROMPT"] = updated_settings["SYSTEM_PROMPT"].strip()
+    
     save_settings(updated_settings)
     global settings
     settings = load_settings()
@@ -85,26 +89,20 @@ def upload_pdf(file: UploadFile = File(...)):
 def process_pdfs():
     """Processes all PDFs available in the raw folder and ensures ChromaDB is safely reset."""
     try:
-        client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
-        client.delete_collection(name=settings["COLLECTION_NAME"])
-        client.get_or_create_collection(name=settings["COLLECTION_NAME"])
+        reset_chroma_db()
 
-        del client
+        if os.path.exists(settings["PDF_PROCESSED"]):
+            shutil.rmtree(settings["PDF_PROCESSED"], ignore_errors=True)
+        os.makedirs(settings["PDF_PROCESSED"], exist_ok=True)
+
+        process_all_pdfs()
+        store_embeddings_in_chromadb()
+
+        return {"message": "All PDFs processed and embeddings stored successfully."}
+
     except Exception as e:
-        print(f"ChromaDB error: {e}")
-
-    if os.path.exists(settings["CHROMA_DB_DIR"]):
-        shutil.rmtree(settings["CHROMA_DB_DIR"], ignore_errors=True)
-    os.makedirs(settings["CHROMA_DB_DIR"], exist_ok=True)
-
-    if os.path.exists(settings["PDF_PROCESSED"]):
-        shutil.rmtree(settings["PDF_PROCESSED"], ignore_errors=True)
-    os.makedirs(settings["PDF_PROCESSED"], exist_ok=True)
-
-    process_all_pdfs()
-    store_embeddings_in_chromadb()
-
-    return {"message": "All PDFs processed and embeddings stored successfully."}
+        print(f"Error processing PDFs: {e}")
+        return {"error": str(e)}
 
 
 @app.delete("/delete-pdf/")
@@ -122,22 +120,7 @@ def delete_pdf(file_name: str):
 
     if os.path.exists(processed_folder):
         shutil.rmtree(processed_folder)
-
-    pdf_name = file_name.replace(".pdf", "")
-    try:
-        client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
-        vector_db = client.get_or_create_collection(name=settings["COLLECTION_NAME"])
-
-        vector_db.delete(where={"source": {"$eq": f"{pdf_name}/"}})
-        vector_db.delete(where={"pdf_name": {"$eq": pdf_name}})
-
-        remaining = vector_db.get(where={"pdf_name": {"$eq": pdf_name}})
-        if remaining["ids"]:
-            print(f"Warning: Some embeddings for {pdf_name} still exist in ChromaDB!")
-        else:
-            print(f"All embeddings for {pdf_name} successfully removed from ChromaDB.")
-
-    except Exception as e:
-        print(f"Warning: Could not delete embeddings for {pdf_name}: {e}")
+        
+    delete_pdf_embeddings(file_name.replace(".pdf", ""))
 
     return {"message": f"{file_name} and all related data deleted successfully"}
