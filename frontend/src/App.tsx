@@ -12,9 +12,9 @@ import Sidebar from './components/Sidebar';
 const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [FileOpen, setFileOpen] = useState(false);
-
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
@@ -53,8 +53,34 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSendMessage = (message: { text: string; sender: 'user' | 'ai' }) => {
+  const handleSendMessage = async (message: { text: string; sender: 'user' | 'ai' }) => {
+    if (message.text.trim() === '' || isSending) return;
+
+    setIsSending(true);
+
     setMessages(prevMessages => [...prevMessages, message]);
+
+    if (message.sender === 'ai') {
+      setIsSending(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/ask/', {
+        chat_id: activeChat,
+        question: message.text,
+      });
+
+      setMessages(prevMessages => [...prevMessages, { text: response.data.answer, sender: 'ai' }]);
+
+      if (!activeChat) {
+        setActiveChat(response.data.chat_id);
+      }
+    } catch (error) {
+      console.error('🚨 Hata: API isteği başarısız oldu.', error);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (

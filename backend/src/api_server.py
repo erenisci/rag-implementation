@@ -3,7 +3,7 @@ import os
 import shutil
 import sqlite3
 import uuid
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +16,9 @@ from src.settings import load_settings, save_settings, settings
 
 
 class ChatRequest(BaseModel):
+    chat_id: Optional[str] = None
     question: str
+
 
 app = FastAPI()
 
@@ -107,24 +109,43 @@ def get_chat_history(chat_id: str):
     else:
         raise HTTPException(status_code=404, detail="Chat not found")
 
+
 @app.post("/ask/")
 def ask_question_api(data: ChatRequest):
-    """Handles incoming chat requests without storing any data and without history."""
+    """Adds the message to the chat and returns the response."""
 
-    print("\n📝 ----------- Yeni API Çağrısı -----------")
-    print(f"📥 Gelen İstek Verisi: {data.dict()}")
-    print("------------------------------------------\n")
+    chat_id = data.chat_id or str(uuid.uuid4())  
+    question = data.question
 
-    question = data.question.strip()
+    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    cursor = conn.cursor()
 
-    # 📌 Boş soru gönderilmesini engelle
-    if not question:
-        return {"answer": "Lütfen geçerli bir soru girin."}
+    cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
+    existing_chat = cursor.fetchone()
 
-    response = ask_question(question)  # 📌 Sadece gelen soruyu AI'ya sor
+    if existing_chat:
+        chat_history = eval(existing_chat[0])  
+    else:
+        chat_history = []
 
-    print(f"✅ AI Yanıtı: {response}")
-    return {"answer": response}
+    chat_history.append({"sender": "user", "text": question})
+
+    response = ask_question(question)
+    chat_history.append({"sender": "ai", "text": response})
+
+    cursor.execute(
+        """
+        INSERT INTO chats (chat_id, messages) 
+        VALUES (?, ?) 
+        ON CONFLICT(chat_id) DO UPDATE SET messages = ?
+        """,
+        (chat_id, str(chat_history), str(chat_history)),
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {"chat_id": chat_id, "answer": response}
 
 
 

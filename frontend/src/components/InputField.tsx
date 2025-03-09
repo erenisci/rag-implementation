@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useRef, useState } from 'react';
 import { LuSendHorizontal } from 'react-icons/lu';
 
@@ -8,44 +7,19 @@ interface InputFieldProps {
 
 const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const handleSend = () => {
+    if (!input.trim()) return;
 
-    const userMessage = { text: input, sender: 'user' } as const;
-    onSendMessage(userMessage);
-
+    onSendMessage({ text: input, sender: 'user' });
     setInput('');
-    setLoading(true);
 
     requestAnimationFrame(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
       }
     });
-
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/ask/', {
-        question: input,
-      });
-
-      const answer = response.data.answer;
-      const aiMessage = { text: answer, sender: 'ai' } as const;
-      onSendMessage(aiMessage);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      onSendMessage({ text: 'Error getting response from AI.', sender: 'ai' });
-    } finally {
-      setLoading(false);
-
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-        }
-      }, 10);
-    }
   };
 
   return (
@@ -55,28 +29,18 @@ const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
         placeholder='Type a message...'
         className='flex-1 p-2 bg-stone-700 text-stone-200 rounded resize-none overflow-hidden min-h-[40px] max-h-40'
         value={input}
-        onChange={e => {
-          setInput(e.target.value);
-          if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-          }
-        }}
+        onChange={e => setInput(e.target.value)}
         onKeyDown={e => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendMessage();
+            handleSend();
           }
         }}
         rows={1}
-        disabled={loading}
       />
       <button
-        onClick={sendMessage}
-        className={`ml-2 py-2 px-4 rounded transition-all self-end ${
-          loading ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-400'
-        }`}
-        disabled={loading}
+        onClick={handleSend}
+        className='ml-2 py-2 px-4 rounded transition-all bg-blue-500 hover:bg-blue-400'
       >
         <LuSendHorizontal size={18} />
       </button>
