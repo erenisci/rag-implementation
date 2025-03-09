@@ -53,25 +53,8 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async (message: { text: string; sender: 'user' | 'ai' }) => {
-    const newMessages = [...messages, message];
-    setMessages(newMessages);
-
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/ask/', {
-        chat_id: activeChat,
-        question: message.text,
-        chat_history: messages,
-      });
-
-      if (!activeChat) {
-        setActiveChat(response.data.chat_id);
-      }
-
-      setMessages(prevMessages => [...prevMessages, { text: response.data.answer, sender: 'ai' }]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
+  const handleSendMessage = (message: { text: string; sender: 'user' | 'ai' }) => {
+    setMessages(prevMessages => [...prevMessages, message]);
   };
 
   return (

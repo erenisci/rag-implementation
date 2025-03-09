@@ -1,7 +1,9 @@
+import json
 import os
 import shutil
 import sqlite3
 import uuid
+from typing import List, Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,15 +15,8 @@ from src.rag import ask_question
 from src.settings import load_settings, save_settings, settings
 
 
-class QuestionRequest(BaseModel):
-    question: str
-
-
 class ChatRequest(BaseModel):
-    chat_id: str | None
     question: str
-    chat_history: list
-
 
 app = FastAPI()
 
@@ -112,36 +107,25 @@ def get_chat_history(chat_id: str):
     else:
         raise HTTPException(status_code=404, detail="Chat not found")
 
-
 @app.post("/ask/")
 def ask_question_api(data: ChatRequest):
-    """Adds a new message to the chat or creates a new chat."""
-    chat_id = data.chat_id or str(uuid.uuid4())
-    question = data.question
-    chat_history = data.chat_history
+    """Handles incoming chat requests without storing any data and without history."""
 
-    formatted_history = "\n".join([f"{msg['sender']}: {msg['text']}" for msg in chat_history])
-    full_prompt = f"Previous conversation:\n{formatted_history}\nUser: {question}"
+    print("\n📝 ----------- Yeni API Çağrısı -----------")
+    print(f"📥 Gelen İstek Verisi: {data.dict()}")
+    print("------------------------------------------\n")
 
-    response = ask_question(full_prompt)
+    question = data.question.strip()
 
-    conn = sqlite3.connect(settings["CHAT_HISTORY"])
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
-    existing_chat = cursor.fetchone()
+    # 📌 Boş soru gönderilmesini engelle
+    if not question:
+        return {"answer": "Lütfen geçerli bir soru girin."}
 
-    if existing_chat:
-        new_messages = eval(existing_chat[0]) + [{"sender": "user", "text": question}, {"sender": "ai", "text": response}]
-        cursor.execute("UPDATE chats SET messages = ? WHERE chat_id = ?", (str(new_messages), chat_id))
-    else:
-        new_messages = [{"sender": "user", "text": question}, {"sender": "ai", "text": response}]
-        cursor.execute("INSERT INTO chats (chat_id, messages) VALUES (?, ?)", (chat_id, str(new_messages)))
+    response = ask_question(question)  # 📌 Sadece gelen soruyu AI'ya sor
 
-    conn.commit()
-    conn.close()
+    print(f"✅ AI Yanıtı: {response}")
+    return {"answer": response}
 
-    return {"chat_id": chat_id, "answer": response}
 
 
 @app.get("/get-settings/")

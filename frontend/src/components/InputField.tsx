@@ -16,8 +16,15 @@ const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
 
     const userMessage = { text: input, sender: 'user' } as const;
     onSendMessage(userMessage);
+
     setInput('');
     setLoading(true);
+
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    });
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/ask/', {
@@ -32,6 +39,12 @@ const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
       onSendMessage({ text: 'Error getting response from AI.', sender: 'ai' });
     } finally {
       setLoading(false);
+
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 10);
     }
   };
 
