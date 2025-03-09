@@ -26,7 +26,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   return (
     <li
       className={`flex justify-between items-center p-2 rounded cursor-pointer transition-all ${
-        activeChat === chatId ? 'bg-blue-700' : 'hover:bg-stone-700'
+        activeChat === chatId ? 'bg-stone-700' : 'hover:bg-stone-700'
       }`}
     >
       <span
@@ -37,9 +37,9 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
       </span>
       <button
         onClick={deleteChat}
-        className='p-1 text-red-500 hover:text-red-400'
+        className='p-1 text-red-500 hover:text-red-300'
       >
-        <FiTrash />
+        <FiTrash size={18} />
       </button>
     </li>
   );

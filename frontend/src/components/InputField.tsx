@@ -65,7 +65,7 @@ const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
         }`}
         disabled={loading}
       >
-        <LuSendHorizontal size={20} />
+        <LuSendHorizontal size={18} />
       </button>
     </div>
   );

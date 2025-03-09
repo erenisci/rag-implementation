@@ -86,15 +86,15 @@ const App: React.FC = () => {
         {/* Header */}
         <div className='flex justify-between items-center bg-stone-800 p-4 text-stone-200'>
           <button onClick={() => setSidebarOpen(true)}>
-            {!sidebarOpen ? <FaBars size={20} /> : ' '}
+            {!sidebarOpen ? <FaBars size={18} /> : ' '}
           </button>
           <h1 className='text-lg font-semibold text-center flex-1 ml-14'>Chat</h1>
           <div className='flex gap-6'>
             <button onClick={() => setFileOpen(true)}>
-              <FaRegFileAlt size={20} />
+              <FaRegFileAlt size={18} />
             </button>
             <button onClick={() => setSettingsOpen(true)}>
-              <FiSettings size={20} />
+              <FiSettings size={18} />
             </button>
           </div>
         </div>

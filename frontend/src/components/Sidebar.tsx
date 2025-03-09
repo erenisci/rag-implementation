@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className='flex justify-between items-center'>
         <h2 className='text-lg font-semibold text-center'>AI-Docs</h2>
         <button onClick={() => setSidebarOpen(false)}>
-          <FaChevronLeft size={20} />
+          <FaChevronLeft size={18} />
         </button>
       </div>
 

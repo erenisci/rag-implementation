@@ -106,7 +106,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
 
         <div className='mt-4 flex gap-2'>
           <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 text-white rounded-lg shadow-md tracking-wide border border-blue cursor-pointer hover:bg-stone-600 justify-center'>
-            <FiFile size={20} />
+            <FiFile size={18} />
             <span className='text-sm'>Select PDF</span>
             <input
               type='file'
@@ -120,7 +120,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
             className='w-1/2 bg-blue-500 hover:bg-blue-400 p-2 rounded flex items-center justify-center gap-2'
             disabled={uploading}
           >
-            <FiUploadCloud size={20} />
+            <FiUploadCloud size={18} />
             {uploading ? 'Uploading...' : 'Upload'}
           </button>
         </div>
@@ -130,7 +130,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
           className='w-full bg-purple-600 hover:bg-purple-500 mt-2 p-2 rounded flex items-center justify-center gap-2'
           disabled={processing}
         >
-          <FiRefreshCw size={20} /> {processing ? 'Synchronizing...' : 'Process PDFs'}
+          <FiRefreshCw size={18} /> {processing ? 'Synchronizing...' : 'Process PDFs'}
         </button>
 
         <div className='flex justify-end mt-4'>
