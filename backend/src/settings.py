@@ -41,7 +41,7 @@ def save_settings(new_settings):
 
     if "API_KEY" in env_vars:
         set_key(ENV_FILE, "API_KEY", env_vars["API_KEY"])
-        load_dotenv(override=True)  # Reload environment variables
+        load_dotenv(override=True) 
 
 
 settings = load_settings()
@@ -55,10 +55,11 @@ settings.update(
         "CHROMA_DB_DIR": "data/chroma_db",
         "COLLECTION_NAME": "pdf_embeddings",
         "EMBEDDING_MODEL": "text-embedding-3-large",
+        "CHAT_HISTORY": os.path.abspath("data/chat_history/chat_history.db") 
     }
 )
 
-# Ensure necessary directories exist
 os.makedirs(settings["PDF_RAW"], exist_ok=True)
 os.makedirs(settings["PDF_PROCESSED"], exist_ok=True)
 os.makedirs(settings["CHROMA_DB_DIR"], exist_ok=True)
+os.makedirs(os.path.dirname(settings["CHAT_HISTORY"]), exist_ok=True) 

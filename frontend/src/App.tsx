@@ -12,17 +12,28 @@ import Sidebar from './components/Sidebar';
 const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [FileOpen, setFileOpen] = useState(false);
+
+  const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
     API_KEY: '',
     MODEL: 'gpt-3.5-turbo',
     SYSTEM_PROMPT: '',
   });
-  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
 
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    if (activeChat) {
+      loadChatHistory(activeChat);
+    } else {
+      setMessages([]);
+    }
+  }, [activeChat]);
 
   const fetchSettings = async () => {
     try {
@@ -33,8 +44,34 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSendMessage = (message: { text: string; sender: 'user' | 'ai' }) => {
-    setMessages(prevMessages => [...prevMessages, message]);
+  const loadChatHistory = async (chatId: string) => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/get-chat-history/${chatId}`);
+      setMessages(response.data.messages);
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+    }
+  };
+
+  const handleSendMessage = async (message: { text: string; sender: 'user' | 'ai' }) => {
+    const newMessages = [...messages, message];
+    setMessages(newMessages);
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/ask/', {
+        chat_id: activeChat,
+        question: message.text,
+        chat_history: messages,
+      });
+
+      if (!activeChat) {
+        setActiveChat(response.data.chat_id);
+      }
+
+      setMessages(prevMessages => [...prevMessages, { text: response.data.answer, sender: 'ai' }]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
@@ -42,6 +79,8 @@ const App: React.FC = () => {
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        setActiveChat={setActiveChat}
+        activeChat={activeChat}
       />
       <div className='flex-1 flex flex-col'>
         {/* Header */}

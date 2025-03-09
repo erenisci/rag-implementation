@@ -1,5 +1,7 @@
 import os
 import shutil
+import sqlite3
+import uuid
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +17,12 @@ class QuestionRequest(BaseModel):
     question: str
 
 
+class ChatRequest(BaseModel):
+    chat_id: str | None
+    question: str
+    chat_history: list
+
+
 app = FastAPI()
 
 # Allow frontend requests
@@ -27,17 +35,113 @@ app.add_middleware(
 )
 
 
+def init_db():
+    """Ensures database file and table exist."""
+    db_path = settings["CHAT_HISTORY"]
+    db_dir = os.path.dirname(db_path)
+
+    os.makedirs(db_dir, exist_ok=True)
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chats (
+            chat_id TEXT PRIMARY KEY,
+            messages TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+
+init_db()
+
+
 @app.get("/status/")
 def status():
     """Checks if the API is running."""
     return {"status": "API is running"}
 
 
+@app.post("/new-chat/")
+def new_chat():
+    """Creates a new chat and returns an ID."""
+    chat_id = str(uuid.uuid4())
+    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO chats (chat_id, messages) VALUES (?, ?)", (chat_id, "[]"))
+    conn.commit()
+    conn.close()
+    return {"chat_id": chat_id}
+
+
+@app.get("/get-chats/")
+def get_chats():
+    """Lists all chats."""
+    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    cursor = conn.cursor()
+    cursor.execute("SELECT chat_id FROM chats")
+    chats = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return {"chats": chats}
+
+
+@app.delete("/delete-chat/{chat_id}")
+def delete_chat(chat_id: str):
+    """Deletes a specific chat from the database."""
+    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM chats WHERE chat_id = ?", (chat_id,))
+    conn.commit()
+    conn.close()
+
+    return {"message": f"Chat {chat_id} deleted successfully"}
+
+
+@app.get("/get-chat-history/{chat_id}")
+def get_chat_history(chat_id: str):
+    """Returns the history of the specified chat."""
+    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    cursor = conn.cursor()
+    cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
+    chat = cursor.fetchone()
+    conn.close()
+    
+    if chat:
+        return {"chat_id": chat_id, "messages": eval(chat[0])}
+    else:
+        raise HTTPException(status_code=404, detail="Chat not found")
+
+
 @app.post("/ask/")
-def ask(request: QuestionRequest):
-    """Processes a question using the document retrieval system and returns an answer."""
-    answer = ask_question(request.question)
-    return {"answer": answer}
+def ask_question_api(data: ChatRequest):
+    """Adds a new message to the chat or creates a new chat."""
+    chat_id = data.chat_id or str(uuid.uuid4())
+    question = data.question
+    chat_history = data.chat_history
+
+    formatted_history = "\n".join([f"{msg['sender']}: {msg['text']}" for msg in chat_history])
+    full_prompt = f"Previous conversation:\n{formatted_history}\nUser: {question}"
+
+    response = ask_question(full_prompt)
+
+    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
+    existing_chat = cursor.fetchone()
+
+    if existing_chat:
+        new_messages = eval(existing_chat[0]) + [{"sender": "user", "text": question}, {"sender": "ai", "text": response}]
+        cursor.execute("UPDATE chats SET messages = ? WHERE chat_id = ?", (str(new_messages), chat_id))
+    else:
+        new_messages = [{"sender": "user", "text": question}, {"sender": "ai", "text": response}]
+        cursor.execute("INSERT INTO chats (chat_id, messages) VALUES (?, ?)", (chat_id, str(new_messages)))
+
+    conn.commit()
+    conn.close()
+
+    return {"chat_id": chat_id, "answer": response}
 
 
 @app.get("/get-settings/")

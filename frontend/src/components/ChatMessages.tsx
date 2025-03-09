@@ -1,8 +1,16 @@
+import { useEffect, useRef } from 'react';
+
 interface ChatMessagesProps {
   messages: { text: string; sender: 'user' | 'ai' }[];
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({ messages = [] }) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <div className='flex-1 flex flex-col overflow-y-auto py-8 px-16 space-y-4 text-stone-100'>
       {messages.length === 0 && <p className='text-center text-stone-400'>No messages yet.</p>}
@@ -16,6 +24,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages = [] }) => {
           {msg.text}
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };
