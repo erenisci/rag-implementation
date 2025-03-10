@@ -29,7 +29,7 @@ else:
 
     prompt = ChatPromptTemplate.from_messages(
         [
-            ("system", settings["SYSTEM_PROMPT"]),
+            ("system", settings["SYSTEM_PROMPT"] + ". Document Context: {context}"),
             ("user", "{input}"),
         ]
     )

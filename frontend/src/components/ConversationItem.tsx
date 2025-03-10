@@ -28,13 +28,9 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
       className={`flex justify-between items-center p-2 rounded cursor-pointer transition-all ${
         activeChat === chatId ? 'bg-stone-700' : 'hover:bg-stone-700'
       }`}
+      onClick={() => onSelect(chatId)}
     >
-      <span
-        onClick={() => onSelect(chatId)}
-        className='cursor-pointer'
-      >
-        Chat {chatId.slice(0, 8)}...
-      </span>
+      <span className='cursor-pointer'>Chat {chatId.slice(0, 8)}...</span>
       <button
         onClick={deleteChat}
         className='p-1 text-red-500 hover:text-red-300'

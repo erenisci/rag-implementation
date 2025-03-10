@@ -14,7 +14,6 @@ const App: React.FC = () => {
   const [FileOpen, setFileOpen] = useState(false);
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
-  const [isSending, setIsSending] = useState(false);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
@@ -54,32 +53,29 @@ const App: React.FC = () => {
   };
 
   const handleSendMessage = async (message: { text: string; sender: 'user' | 'ai' }) => {
-    if (message.text.trim() === '' || isSending) return;
-
-    setIsSending(true);
-
     setMessages(prevMessages => [...prevMessages, message]);
 
-    if (message.sender === 'ai') {
-      setIsSending(false);
-      return;
-    }
+    if (message.sender === 'ai') return;
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/ask/', {
         chat_id: activeChat,
         question: message.text,
+        chat_history: messages,
       });
 
-      setMessages(prevMessages => [...prevMessages, { text: response.data.answer, sender: 'ai' }]);
+      const aiMessage = { text: response.data.answer, sender: 'ai' } as const;
+      setMessages(prevMessages => [...prevMessages, aiMessage]);
 
       if (!activeChat) {
         setActiveChat(response.data.chat_id);
       }
     } catch (error) {
-      console.error('🚨 Hata: API isteği başarısız oldu.', error);
-    } finally {
-      setIsSending(false);
+      console.error('Error sending message:', error);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: 'Error getting response from AI.', sender: 'ai' },
+      ]);
     }
   };
 

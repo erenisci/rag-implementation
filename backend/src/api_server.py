@@ -1,9 +1,8 @@
-import json
 import os
 import shutil
 import sqlite3
 import uuid
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +17,7 @@ from src.settings import load_settings, save_settings, settings
 class ChatRequest(BaseModel):
     chat_id: Optional[str] = None
     question: str
+    chat_history: List[dict] = []
 
 
 app = FastAPI()
@@ -113,9 +113,7 @@ def get_chat_history(chat_id: str):
 @app.post("/ask/")
 def ask_question_api(data: ChatRequest):
     """Adds the message to the chat and returns the response."""
-
-    chat_id = data.chat_id or str(uuid.uuid4())  
-    question = data.question
+    chat_id = data.chat_id or str(uuid.uuid4())
 
     conn = sqlite3.connect(settings["CHAT_HISTORY"])
     cursor = conn.cursor()
@@ -124,29 +122,28 @@ def ask_question_api(data: ChatRequest):
     existing_chat = cursor.fetchone()
 
     if existing_chat:
-        chat_history = eval(existing_chat[0])  
+        chat_history = eval(existing_chat[0])
     else:
         chat_history = []
 
-    chat_history.append({"sender": "user", "text": question})
+    chat_history.append({"sender": "user", "text": data.question})
 
-    response = ask_question(question)
+    formatted_history = "\n".join([f"{msg['sender']}: {msg['text']}" for msg in chat_history])
+    full_prompt = f"Previous conversation:\n{formatted_history}\nUser: {data.question}"
+
+    response = ask_question(full_prompt)
+
     chat_history.append({"sender": "ai", "text": response})
 
     cursor.execute(
-        """
-        INSERT INTO chats (chat_id, messages) 
-        VALUES (?, ?) 
-        ON CONFLICT(chat_id) DO UPDATE SET messages = ?
-        """,
-        (chat_id, str(chat_history), str(chat_history)),
+        "INSERT INTO chats (chat_id, title, messages) VALUES (?, ?, ?) ON CONFLICT(chat_id) DO UPDATE SET messages = ?",
+        (chat_id, "Chat " + chat_id[:8], str(chat_history), str(chat_history))
     )
 
     conn.commit()
     conn.close()
 
     return {"chat_id": chat_id, "answer": response}
-
 
 
 @app.get("/get-settings/")
