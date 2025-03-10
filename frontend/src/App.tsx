@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [FileOpen, setFileOpen] = useState(false);
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
-
+  const [chats, setChats] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
     API_KEY: '',
@@ -25,6 +25,19 @@ const App: React.FC = () => {
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
+  const fetchChats = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/get-chats/');
+      setChats(response.data.chats);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+    }
+  };
 
   useEffect(() => {
     if (activeChat) {
@@ -69,6 +82,7 @@ const App: React.FC = () => {
 
       if (!activeChat) {
         setActiveChat(response.data.chat_id);
+        fetchChats();
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -86,6 +100,8 @@ const App: React.FC = () => {
         setSidebarOpen={setSidebarOpen}
         setActiveChat={setActiveChat}
         activeChat={activeChat}
+        chats={chats}
+        fetchChats={fetchChats}
       />
       <div className='flex-1 flex flex-col'>
         {/* Header */}

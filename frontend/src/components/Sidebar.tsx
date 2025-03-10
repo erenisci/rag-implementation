@@ -1,5 +1,3 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { FiPlus } from 'react-icons/fi';
 import ConversationItem from './ConversationItem';
@@ -9,6 +7,8 @@ interface SidebarProps {
   setSidebarOpen: (open: boolean) => void;
   setActiveChat: (chatId: string | null) => void;
   activeChat: string | null;
+  chats: string[];
+  fetchChats: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -16,22 +16,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   setSidebarOpen,
   setActiveChat,
   activeChat,
+  chats,
+  fetchChats,
 }) => {
-  const [chats, setChats] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
-
-  const fetchChats = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/get-chats/');
-      setChats(response.data.chats);
-    } catch (error) {
-      console.error('Error fetching chats:', error);
-    }
-  };
-
   const handleNewChat = () => {
     setActiveChat(null);
   };
@@ -62,13 +49,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Chat List */}
       <ul className='mt-4 space-y-2'>
-        {chats.map(chat => (
+        {chats.map((chat, i) => (
           <ConversationItem
             key={chat}
             chatId={chat}
+            chatNum={i}
             onSelect={setActiveChat}
             activeChat={activeChat}
             refreshChats={fetchChats}
+            handleNewChat={handleNewChat}
           />
         ))}
       </ul>

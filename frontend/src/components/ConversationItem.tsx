@@ -5,18 +5,29 @@ interface ConversationItemProps {
   chatId: string;
   onSelect: (chatId: string) => void;
   activeChat: string | null;
+  chatNum: number;
   refreshChats: () => void;
+  handleNewChat: () => void;
 }
 
 const ConversationItem: React.FC<ConversationItemProps> = ({
   chatId,
   onSelect,
   activeChat,
+  chatNum,
   refreshChats,
+  handleNewChat,
 }) => {
-  const deleteChat = async () => {
+  const deleteChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
     try {
       await axios.delete(`http://127.0.0.1:8000/delete-chat/${chatId}`);
+
+      if (activeChat === chatId) {
+        handleNewChat();
+      }
+
       refreshChats();
     } catch (error) {
       console.error('Error deleting chat:', error);
@@ -30,7 +41,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
       }`}
       onClick={() => onSelect(chatId)}
     >
-      <span className='cursor-pointer'>Chat {chatId.slice(0, 8)}...</span>
+      <span className='cursor-pointer'>Chat {chatNum + 1}...</span>
       <button
         onClick={deleteChat}
         className='p-1 text-red-500 hover:text-red-300'
