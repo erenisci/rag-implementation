@@ -6,18 +6,34 @@ from dotenv import load_dotenv, set_key
 
 load_dotenv(override=True)
 
-SETTINGS_FILE = "settings/settings.json"
+SETTINGS_DIR = "settings"
+SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 ENV_FILE = ".env"
+
+DEFAULT_SETTINGS = {
+    "MODEL": "gpt-3.5-turbo",
+    "SYSTEM_PROMPT": "You are a helpful AI assistant."
+}
 
 
 def load_settings():
     """Loads the latest configuration from settings.json and .env dynamically."""
     settings = {}
+    
+    os.makedirs(SETTINGS_DIR, exist_ok=True)
+    
+    if not os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
+            json.dump(DEFAULT_SETTINGS, file, indent=2)
 
     # Read the JSON file
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, "r", encoding="utf-8") as file:
             settings.update(json.load(file))
+            
+    if not os.path.exists(ENV_FILE):
+        with open(ENV_FILE, "w") as file:
+            file.write("API_KEY=")
 
     # Load API_KEY from .env file
     settings["API_KEY"] = os.getenv("API_KEY", "")
