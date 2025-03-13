@@ -7,30 +7,28 @@ from chromadb.utils import embedding_functions
 from src.settings import settings
 
 
-openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-    api_key=settings["API_KEY"],
-    model_name=settings["EMBEDDING_MODEL"]
-)
+def get_openai_embedding_function():
+    """Returns the OpenAI embedding function if API key exists, otherwise None."""
+    if not os.getenv("API_KEY"):
+        print("WARNING: No OpenAI API Key provided. Running without OpenAI embeddings.")
+        return None
+    
+    return embedding_functions.OpenAIEmbeddingFunction(api_key=os.getenv("API_KEY"), model_name=settings["EMBEDDING_MODEL"])
 
-client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
 
-def get_vector_db():
-    """Gets or creates an existing ChromaDB collection."""
-    try:
-        collection = client.get_collection(
-            name=settings["COLLECTION_NAME"], 
-            embedding_function=openai_ef 
-        )
-        print(f"Loaded ChromaDB collection: {collection.name}")
-        return collection
-    except Exception as e:
-        print(f"Error accessing ChromaDB collection: {e}. Creating a new one.")
-        return client.get_or_create_collection(
-            name=settings["COLLECTION_NAME"],
-            embedding_function=openai_ef 
-        )
+def get_chroma_client():
+    """Creates and returns ChromaDB client and collection."""
+    os.makedirs(settings["CHROMA_DB_DIR"], exist_ok=True)
+    client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
+    openai_ef = get_openai_embedding_function()
 
-vector_db = get_vector_db()
+    collection = client.get_or_create_collection(
+        name=settings["COLLECTION_NAME"],
+        embedding_function=openai_ef
+    )
+
+    return client, collection
+
 
 def load_text_chunks():
     """Loads text chunks from processed directories."""
@@ -52,10 +50,11 @@ def load_text_chunks():
 
     return chunks, file_names, pdf_names
 
+
 def store_embeddings_in_chromadb():
     """Stores text chunks as embeddings."""
     global vector_db
-    vector_db = get_vector_db()
+    _, vector_db = get_chroma_client()
 
     if vector_db is None:
         print("ChromaDB collection not found. Skipping embedding storage.")
@@ -79,27 +78,31 @@ def store_embeddings_in_chromadb():
 
     print(f"{len(chunks)} new chunks added to ChromaDB!")
 
+
 def delete_pdf_embeddings(pdf_name):
     """Deletes all embeddings related to a specific PDF from ChromaDB."""
     global vector_db
-    vector_db = get_vector_db()
+    _, vector_db = get_chroma_client()
 
     if vector_db is None:
         print("ChromaDB collection not found. Skipping deletion.")
         return
 
-    all_embeddings = vector_db.get()
+    try:
+        all_embeddings = vector_db.get()
+        ids_to_delete = [
+            doc_id for doc_id, metadata in zip(all_embeddings["ids"], all_embeddings["metadatas"])
+            if metadata.get("pdf_name") == pdf_name
+        ]
 
-    ids_to_delete = [
-        doc_id for doc_id, metadata in zip(all_embeddings["ids"], all_embeddings["metadatas"])
-        if metadata["pdf_name"] == pdf_name
-    ]
-
-    if ids_to_delete:
-        vector_db.delete(ids=ids_to_delete)
-        print(f"Deleted {len(ids_to_delete)} embeddings related to {pdf_name}")
-    else:
-        print(f"No embeddings found for {pdf_name}")
+        if ids_to_delete:
+            vector_db.delete(ids=ids_to_delete)
+            print(f"Deleted {len(ids_to_delete)} embeddings related to {pdf_name}")
+        else:
+            print(f"No embeddings found for {pdf_name}")
+            
+    except Exception as e:
+        print(f"Error deleting embeddings for {pdf_name}: {e}")
 
 
 def reset_chroma_db():
@@ -109,12 +112,10 @@ def reset_chroma_db():
 
     os.makedirs(settings["CHROMA_DB_DIR"], exist_ok=True)
 
-    global client
-    client = chromadb.PersistentClient(path=settings["CHROMA_DB_DIR"])
-    global vector_db
-    vector_db = client.get_or_create_collection(
-        name=settings["COLLECTION_NAME"],
-        embedding_function=openai_ef 
-    )
-
-    print("ChromaDB reset and collection recreated.")
+    global client, vector_db
+    _, vector_db = get_chroma_client()
+    
+    if vector_db:
+        print("ChromaDB reset and collection recreated.")
+    else:
+        print("Error resetting ChromaDB.")

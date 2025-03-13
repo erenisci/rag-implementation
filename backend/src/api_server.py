@@ -11,7 +11,8 @@ from src.embedding import (delete_pdf_embeddings, reset_chroma_db,
                            store_embeddings_in_chromadb)
 from src.preprocessing import process_all_pdfs
 from src.rag import ask_question
-from src.settings import load_settings, save_settings, settings
+from src.settings import (CHAT_HISTORY_PATH, load_settings, save_settings,
+                          settings)
 
 
 class ChatRequest(BaseModel):
@@ -32,90 +33,12 @@ app.add_middleware(
 )
 
 
-def init_db():
-    """Ensures database file and table exist."""
-    db_path = settings["CHAT_HISTORY"]
-    db_dir = os.path.dirname(db_path)
-
-    os.makedirs(db_dir, exist_ok=True)
-
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS chats (
-            chat_id TEXT PRIMARY KEY,
-            messages TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-
-init_db()
-
-
-@app.get("/status/")
-def status():
-    """Checks if the API is running."""
-    return {"status": "API is running"}
-
-
-@app.post("/new-chat/")
-def new_chat():
-    """Creates a new chat and returns an ID."""
-    chat_id = str(uuid.uuid4())
-    conn = sqlite3.connect(settings["CHAT_HISTORY"])
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO chats (chat_id, messages) VALUES (?, ?)", (chat_id, "[]"))
-    conn.commit()
-    conn.close()
-    return {"chat_id": chat_id}
-
-
-@app.get("/get-chats/")
-def get_chats():
-    """Lists all chats."""
-    conn = sqlite3.connect(settings["CHAT_HISTORY"])
-    cursor = conn.cursor()
-    cursor.execute("SELECT chat_id FROM chats")
-    chats = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return {"chats": chats}
-
-
-@app.delete("/delete-chat/{chat_id}")
-def delete_chat(chat_id: str):
-    """Deletes a specific chat from the database."""
-    conn = sqlite3.connect(settings["CHAT_HISTORY"])
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM chats WHERE chat_id = ?", (chat_id,))
-    conn.commit()
-    conn.close()
-
-    return {"message": f"Chat {chat_id} deleted successfully"}
-
-
-@app.get("/get-chat-history/{chat_id}")
-def get_chat_history(chat_id: str):
-    """Returns the history of the specified chat."""
-    conn = sqlite3.connect(settings["CHAT_HISTORY"])
-    cursor = conn.cursor()
-    cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
-    chat = cursor.fetchone()
-    conn.close()
-    
-    if chat:
-        return {"chat_id": chat_id, "messages": eval(chat[0])}
-    else:
-        raise HTTPException(status_code=404, detail="Chat not found")
-
-
 @app.post("/ask/")
 def ask_question_api(data: ChatRequest):
     """Adds the message to the chat and returns the response."""
     chat_id = data.chat_id or str(uuid.uuid4())
 
-    conn = sqlite3.connect(settings["CHAT_HISTORY"])
+    conn = sqlite3.connect(CHAT_HISTORY_PATH)
     cursor = conn.cursor()
 
     cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
@@ -144,6 +67,44 @@ def ask_question_api(data: ChatRequest):
     conn.close()
 
     return {"chat_id": chat_id, "answer": response}
+
+
+@app.get("/get-chats/")
+def get_chats():
+    """Lists all chats."""
+    conn = sqlite3.connect(CHAT_HISTORY_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT chat_id FROM chats")
+    chats = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return {"chats": chats}
+
+
+@app.get("/get-chat-history/{chat_id}")
+def get_chat_history(chat_id: str):
+    """Returns the history of the specified chat."""
+    conn = sqlite3.connect(CHAT_HISTORY_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
+    chat = cursor.fetchone()
+    conn.close()
+    
+    if chat:
+        return {"chat_id": chat_id, "messages": eval(chat[0])}
+    else:
+        raise HTTPException(status_code=404, detail="Chat not found")
+
+
+@app.delete("/delete-chat/{chat_id}")
+def delete_chat(chat_id: str):
+    """Deletes a specific chat from the database."""
+    conn = sqlite3.connect(CHAT_HISTORY_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM chats WHERE chat_id = ?", (chat_id,))
+    conn.commit()
+    conn.close()
+
+    return {"message": f"Chat {chat_id} deleted successfully"}
 
 
 @app.get("/get-settings/")
