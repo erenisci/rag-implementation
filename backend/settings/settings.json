@@ -1,4 +1,0 @@
-{
-  "MODEL": "gpt-3.5-turbo",
-  "SYSTEM_PROMPT": "Generate responses based on the provided PDF data and reply in Turkish."
-}
