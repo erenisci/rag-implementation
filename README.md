@@ -83,13 +83,12 @@ The frontend will be available at `http://localhost:5173`
 | Method   | Endpoint                      | Description                            |
 | -------- | ----------------------------- | -------------------------------------- |
 | `POST`   | `/ask/`                       | Sends a query to the chatbot.          |
-| `POST`   | `/new-chat/`                  | Creates a new chat session.            |
 | `GET`    | `/get-chats/`                 | Retrieves all stored chat sessions.    |
 | `GET`    | `/get-chat-history/{chat_id}` | Fetches messages from a specific chat. |
 | `DELETE` | `/delete-chat/{chat_id}`      | Deletes a specific chat.               |
+| `GET`    | `/list-pdfs/`                 | Lists all stored PDFs.                 |
 | `POST`   | `/upload-pdf/`                | Uploads a PDF file for processing.     |
 | `POST`   | `/process-pdfs/`              | Processes all uploaded PDFs.           |
-| `GET`    | `/list-pdfs/`                 | Lists all stored PDFs.                 |
 | `DELETE` | `/delete-pdf/`                | Deletes a specific PDF file.           |
 
 ---
