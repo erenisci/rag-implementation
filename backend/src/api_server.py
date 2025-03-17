@@ -2,6 +2,7 @@ import os
 import shutil
 import sqlite3
 import uuid
+from contextlib import asynccontextmanager
 from typing import List, Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -10,7 +11,7 @@ from pydantic import BaseModel
 from src.embedding import (delete_pdf_embeddings, reset_chroma_db,
                            store_embeddings_in_chromadb)
 from src.preprocessing import process_all_pdfs
-from src.rag import ask_question
+from src.rag import chain, initialize_chain
 from src.settings import (CHAT_HISTORY_PATH, load_settings, save_settings,
                           settings)
 
@@ -21,7 +22,12 @@ class ChatRequest(BaseModel):
     chat_history: List[dict] = []
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    initialize_chain()  # Uygulama açılırken çalışır
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 # Allow frontend requests
 app.add_middleware(
@@ -32,15 +38,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.post("/ask/")
 def ask_question_api(data: ChatRequest):
-    """Adds the message to the chat and returns the response."""
+    global chain
     chat_id = data.chat_id or str(uuid.uuid4())
 
     conn = sqlite3.connect(CHAT_HISTORY_PATH)
     cursor = conn.cursor()
-
     cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
     existing_chat = cursor.fetchone()
 
@@ -54,20 +58,24 @@ def ask_question_api(data: ChatRequest):
     formatted_history = "\n".join([f"{msg['sender']}: {msg['text']}" for msg in chat_history])
     full_prompt = f"Previous conversation:\n{formatted_history}\nUser: {data.question}"
 
-    response = ask_question(full_prompt)
+    if not chain:
+        raise HTTPException(status_code=500, detail="Model initialization failed.")
 
-    chat_history.append({"sender": "ai", "text": response})
+    response = chain.invoke({"input": full_prompt})
+    answer = response["answer"]
+
+    chat_history.append({"sender": "ai", "text": answer})
 
     cursor.execute(
-        "INSERT INTO chats (chat_id, title, messages) VALUES (?, ?, ?) ON CONFLICT(chat_id) DO UPDATE SET messages = ?",
+        "INSERT INTO chats (chat_id, title, messages) VALUES (?, ?, ?) "
+        "ON CONFLICT(chat_id) DO UPDATE SET messages = ?",
         (chat_id, "Chat " + chat_id[:8], str(chat_history), str(chat_history))
     )
 
     conn.commit()
     conn.close()
 
-    return {"chat_id": chat_id, "answer": response}
-
+    return {"chat_id": chat_id, "answer": answer}
 
 @app.get("/get-chats/")
 def get_chats():
@@ -154,7 +162,7 @@ def upload_pdf(file: UploadFile = File(...)):
 
 @app.post("/process-pdfs/")
 def process_pdfs():
-    """Processes all PDFs available in the raw folder and ensures ChromaDB is safely reset."""
+    global chain
     try:
         reset_chroma_db()
 
@@ -165,6 +173,8 @@ def process_pdfs():
         process_all_pdfs()
         store_embeddings_in_chromadb()
 
+        _, _, chain = initialize_chain()
+
         return {"message": "All PDFs processed and embeddings stored successfully."}
 
     except Exception as e:
@@ -174,11 +184,10 @@ def process_pdfs():
 
 @app.delete("/delete-pdf/")
 def delete_pdf(file_name: str):
-    """Deletes a specified PDF file, its processed data, and associated embeddings."""
+    global chain
+
     file_path = os.path.join(settings["PDF_RAW"], file_name)
-    processed_folder = os.path.join(
-        settings["PDF_PROCESSED"], file_name.replace(".pdf", "")
-    )
+    processed_folder = os.path.join(settings["PDF_PROCESSED"], file_name.replace(".pdf", ""))
 
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -187,7 +196,9 @@ def delete_pdf(file_name: str):
 
     if os.path.exists(processed_folder):
         shutil.rmtree(processed_folder)
-        
+
     delete_pdf_embeddings(file_name.replace(".pdf", ""))
+
+    _, _, chain = initialize_chain()
 
     return {"message": f"{file_name} and all related data deleted successfully"}
