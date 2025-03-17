@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [FileOpen, setFileOpen] = useState(false);
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([]);
-  const [chats, setChats] = useState<string[]>([]);
+  const [chats, setChats] = useState<{ chat_id: string; title: string }[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
     API_KEY: '',
@@ -56,9 +56,9 @@ const App: React.FC = () => {
     }
   };
 
-  const loadChatHistory = async (chatId: string) => {
+  const loadChatHistory = async (chat_id: string) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/get-chat-history/${chatId}`);
+      const response = await axios.get(`http://127.0.0.1:8000/get-chat-history/${chat_id}`);
       setMessages(response.data.messages);
     } catch (error) {
       console.error('Error fetching chat history:', error);

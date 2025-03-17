@@ -77,7 +77,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
 
   return (
     <div className='fixed inset-0 bg-stone-900 bg-opacity-50 flex justify-center items-center'>
-      <div className='bg-stone-800 p-6 rounded-lg w-96 text-white relative'>
+      <div className='bg-stone-800 p-6 rounded-lg w-[30rem] text-white relative'>
         <h2 className='text-xl font-semibold mb-4'>PDF Files</h2>
         {loading ? (
           <p>Loading...</p>
@@ -91,14 +91,18 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
                 className='flex justify-between items-center bg-stone-700 p-2 rounded'
               >
                 <span className='flex items-center gap-2'>
-                  <FiUploadCloud size={16} /> {pdf.name} ({pdf.size_mb} MB)
+                  <FiUploadCloud size={18} />
+                  {pdf.name.length > 39 ? pdf.name.slice(0, 39).trim() + '...' : pdf.name}
                 </span>
-                <button
-                  onClick={() => deletePDF(pdf.name)}
-                  className='bg-red-500 hover:bg-red-400 p-1 rounded'
-                >
-                  <FiTrash size={16} />
-                </button>
+                <div className='flex gap-2'>
+                  <span>({pdf.size_mb} MB)</span>
+                  <button
+                    onClick={() => deletePDF(pdf.name)}
+                    className='bg-red-500 hover:bg-red-400 p-1 rounded'
+                  >
+                    <FiTrash size={18} />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -127,7 +131,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
 
         <button
           onClick={handleProcessPDFs}
-          className='w-full bg-purple-600 hover:bg-purple-500 mt-2 p-2 rounded flex items-center justify-center gap-2'
+          className='w-full bg-purple-500 hover:bg-purple-400 mt-2 p-2 rounded flex items-center justify-center gap-2'
           disabled={processing}
         >
           <FiRefreshCw size={18} /> {processing ? 'Synchronizing...' : 'Process PDFs'}

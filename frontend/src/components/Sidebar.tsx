@@ -5,9 +5,9 @@ import ConversationItem from './ConversationItem';
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
-  setActiveChat: (chatId: string | null) => void;
+  setActiveChat: (chat_id: string | null) => void;
   activeChat: string | null;
-  chats: string[];
+  chats: { chat_id: string; title: string }[];
   fetchChats: () => void;
 }
 
@@ -49,11 +49,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Chat List */}
       <ul className='mt-4 space-y-2'>
-        {chats.map((chat, i) => (
+        {chats.map(({ chat_id, title }) => (
           <ConversationItem
-            key={chat}
-            chatId={chat}
-            chatNum={i}
+            key={chat_id}
+            chat_id={chat_id}
+            title={title}
             onSelect={setActiveChat}
             activeChat={activeChat}
             refreshChats={fetchChats}

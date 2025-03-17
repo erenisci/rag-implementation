@@ -69,7 +69,7 @@ def ask_question_api(data: ChatRequest):
     cursor.execute(
         "INSERT INTO chats (chat_id, title, messages) VALUES (?, ?, ?) "
         "ON CONFLICT(chat_id) DO UPDATE SET messages = ?",
-        (chat_id, "Chat " + chat_id[:8], str(chat_history), str(chat_history))
+        (chat_id, "chat_id: " + chat_id, str(chat_history), str(chat_history))
     )
 
     conn.commit()
@@ -77,13 +77,14 @@ def ask_question_api(data: ChatRequest):
 
     return {"chat_id": chat_id, "answer": answer}
 
+
 @app.get("/get-chats/")
 def get_chats():
-    """Lists all chats."""
+    """Lists all chats with titles."""
     conn = sqlite3.connect(CHAT_HISTORY_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT chat_id FROM chats")
-    chats = [row[0] for row in cursor.fetchall()]
+    cursor.execute("SELECT chat_id, title FROM chats")
+    chats = [{"chat_id": row[0], "title": row[1] or row[0]} for row in cursor.fetchall()]
     conn.close()
     return {"chats": chats}
 
@@ -101,6 +102,19 @@ def get_chat_history(chat_id: str):
         return {"chat_id": chat_id, "messages": eval(chat[0])}
     else:
         raise HTTPException(status_code=404, detail="Chat not found")
+
+
+@app.post("/update-chat-title/{chat_id}/{new_title}")
+def update_chat_title(chat_id: str, new_title: str):
+    """Updates the title of a given chat."""
+    conn = sqlite3.connect(CHAT_HISTORY_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("UPDATE chats SET title = ? WHERE chat_id = ?", (new_title, chat_id))
+    conn.commit()
+    conn.close()
+
+    return {"message": "Chat title updated successfully"}
 
 
 @app.delete("/delete-chat/{chat_id}")

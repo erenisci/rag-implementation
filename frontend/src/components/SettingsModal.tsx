@@ -54,7 +54,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className='fixed inset-0 bg-stone-900 bg-opacity-50 flex justify-center items-center'>
-      <div className='bg-stone-800 p-6 rounded-lg w-96'>
+      <div className='bg-stone-800 p-6 rounded-lg w-[30rem]'>
         <h2 className='text-xl font-semibold mb-4'>Settings</h2>
         <label className='block mb-2 relative'>
           API Key:
@@ -87,7 +87,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <label className='block mb-2'>
           System Prompt:
           <textarea
-            className='w-full p-3 bg-stone-700 rounded mt-1 h-32 resize-none overflow-y-auto'
+            className='w-full p-3 bg-stone-700 rounded mt-1 h-39 resize-none overflow-y-auto'
             value={localSettings.SYSTEM_PROMPT}
             onChange={e => setLocalSettings({ ...localSettings, SYSTEM_PROMPT: e.target.value })}
           />
@@ -95,13 +95,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className='flex justify-end mt-4'>
           <button
             onClick={() => setSettingsOpen(false)}
-            className='mr-2 bg-red-500 hover:bg-red-400 p-2 rounded'
+            className='mr-2 w-18 bg-red-500 hover:bg-red-400 p-2 rounded'
           >
             Cancel
           </button>
           <button
             onClick={updateSettings}
-            className='bg-green-500 hover:bg-green-400 p-2 rounded'
+            className='w-18 bg-green-500 hover:bg-green-400 p-2 rounded'
           >
             Save
           </button>
