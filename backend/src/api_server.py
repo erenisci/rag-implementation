@@ -24,7 +24,7 @@ class ChatRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    initialize_chain()  # Uygulama açılırken çalışır
+    initialize_chain() 
     yield
 
 app = FastAPI(lifespan=lifespan)
