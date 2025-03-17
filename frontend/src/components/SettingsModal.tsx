@@ -55,7 +55,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   return (
     <div className='fixed inset-0 bg-stone-900 bg-opacity-50 flex justify-center items-center'>
       <div className='bg-stone-800 p-6 rounded-lg w-[30rem]'>
-        <h2 className='text-xl font-semibold mb-4'>Settings</h2>
+        <h2 className='text-xl font-medium mb-4'>Settings</h2>
         <label className='block mb-2 relative'>
           API Key:
           <div className='flex items-center bg-stone-700 rounded mt-1 p-2'>

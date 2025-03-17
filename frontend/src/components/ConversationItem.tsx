@@ -66,7 +66,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
           onChange={e => setNewTitle(e.target.value)}
           onBlur={updateTitle}
           onKeyDown={e => e.key === 'Enter' && updateTitle()}
-          className='bg-transparent border-b border-gray-400 focus:outline-none w-full'
+          className='bg-transparent border-b border-stone-500 focus:outline-none w-full'
           autoFocus
         />
       ) : (
@@ -78,31 +78,33 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
         </span>
       )}
 
-      {isEditing ? (
-        <button
-          onClick={updateTitle}
-          className='p-1 text-green-500 hover:text-green-400'
-        >
-          <FiSave size={18} />
-        </button>
-      ) : (
-        <button
-          onClick={e => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
-          className='p-1 text-stone-500 hover:text-stone-400'
-        >
-          <FiEdit size={18} />
-        </button>
-      )}
+      <div className='flex'>
+        {isEditing ? (
+          <button
+            onClick={updateTitle}
+            className='p-1 mr-1 text-green-500 hover:text-green-400'
+          >
+            <FiSave size={18} />
+          </button>
+        ) : (
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+            className='p-1 mr-1 text-stone-500 hover:text-stone-400'
+          >
+            <FiEdit size={18} />
+          </button>
+        )}
 
-      <button
-        onClick={deleteChat}
-        className='p-1 text-red-500 hover:text-red-400'
-      >
-        <FiTrash size={18} />
-      </button>
+        <button
+          onClick={deleteChat}
+          className='p-1 text-red-500 hover:text-red-400'
+        >
+          <FiTrash size={18} />
+        </button>
+      </div>
     </li>
   );
 };

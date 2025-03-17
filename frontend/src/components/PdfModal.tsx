@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiTrash, FiUploadCloud, FiRefreshCw, FiFile } from 'react-icons/fi';
+import { useEffect, useState } from 'react';
+import { FiFile, FiRefreshCw, FiTrash, FiUploadCloud } from 'react-icons/fi';
 
 interface PDFModalProps {
   setPdfModalOpen: (open: boolean) => void;
@@ -78,13 +78,13 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
   return (
     <div className='fixed inset-0 bg-stone-900 bg-opacity-50 flex justify-center items-center'>
       <div className='bg-stone-800 p-6 rounded-lg w-[30rem] text-white relative'>
-        <h2 className='text-xl font-semibold mb-4'>PDF Files</h2>
+        <h2 className='text-xl font-medium mb-4'>PDF Files</h2>
         {loading ? (
           <p>Loading...</p>
         ) : pdfList.length === 0 ? (
           <p>No PDFs yet.</p>
         ) : (
-          <ul className='space-y-2 max-h-[14.5rem] overflow-y-scroll'>
+          <ul className='max-h-[15.1rem] overflow-y-auto flex flex-col gap-2'>
             {pdfList.map((pdf, index) => (
               <li
                 key={index}
@@ -109,7 +109,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
         )}
 
         <div className='mt-4 flex gap-2'>
-          <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 text-white rounded shadow-md tracking-wide border border-blue cursor-pointer hover:bg-stone-600 justify-center'>
+          <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 text-white rounded shadow-md tracking-wide cursor-pointer hover:bg-stone-600 justify-center'>
             <FiFile size={18} />
             <span className='text-sm'>Select PDF</span>
             <input
@@ -140,7 +140,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
         <div className='flex justify-end mt-4'>
           <button
             onClick={() => setPdfModalOpen(false)}
-            className='bg-red-500 hover:bg-red-400 p-2 rounded'
+            className='w-18 bg-red-500 hover:bg-red-400 p-2 rounded'
           >
             Cancel
           </button>

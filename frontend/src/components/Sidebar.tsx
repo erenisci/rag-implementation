@@ -25,16 +25,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`w-64 bg-stone-800 p-4 text-stone-100 border-r-1 border-stone-900 ${
+      className={`w-72 bg-stone-800 p-4 text-stone-100 border-r-1 h-screen flex flex-col border-stone-900 ${
         sidebarOpen ? '' : 'hidden'
       }`}
     >
       {/* Sidebar Header */}
-      <div className='flex justify-between items-center'>
+      <div className='flex justify-center items-center w-full relative'>
         <a href='#'>
-          <h2 className='text-lg font-semibold text-center'>AI-Docs</h2>
+          <h2 className='text-xl font-medium font-roboto'>AI-Docs</h2>
         </a>
-        <button onClick={() => setSidebarOpen(false)}>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className='absolute right-0 p-1.5 rounded-lg transition-all duration-200 hover:bg-stone-700'
+        >
           <FaChevronLeft size={18} />
         </button>
       </div>
@@ -48,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {/* Chat List */}
-      <ul className='mt-4 space-y-2'>
+      <ul className='mt-4 space-y-2 overflow-y-auto max-h-screen'>
         {chats.map(({ chat_id, title }) => (
           <ConversationItem
             key={chat_id}

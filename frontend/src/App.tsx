@@ -94,7 +94,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className='flex h-screen bg-stone-900 text-stone-200'>
+    <div className='flex h-screen bg-stone-900 text-stone-200 font-roboto'>
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -106,15 +106,24 @@ const App: React.FC = () => {
       <div className='flex-1 flex flex-col'>
         {/* Header */}
         <div className='flex justify-between items-center bg-stone-800 p-4 text-stone-200'>
-          <button onClick={() => setSidebarOpen(true)}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className='p-1.5 rounded-lg transition-all duration-200 hover:bg-stone-700'
+          >
             {!sidebarOpen ? <FaBars size={18} /> : ' '}
           </button>
-          <h1 className='text-lg font-semibold text-center flex-1 ml-14'>Chat</h1>
+          <h1 className='text-lg font-medium text-center flex-1 ml-14'>Chat</h1>
           <div className='flex gap-6'>
-            <button onClick={() => setFileOpen(true)}>
+            <button
+              onClick={() => setFileOpen(true)}
+              className='p-1.5 rounded-lg transition-all duration-200 hover:bg-stone-700'
+            >
               <FaRegFileAlt size={18} />
             </button>
-            <button onClick={() => setSettingsOpen(true)}>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className='p-1.5 rounded-lg transition-all duration-200 hover:bg-stone-700'
+            >
               <FiSettings size={18} />
             </button>
           </div>
