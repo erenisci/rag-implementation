@@ -105,7 +105,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
         )}
 
         <div className='mt-4 flex gap-2'>
-          <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 text-white rounded-lg shadow-md tracking-wide border border-blue cursor-pointer hover:bg-stone-600 justify-center'>
+          <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 text-white rounded shadow-md tracking-wide border border-blue cursor-pointer hover:bg-stone-600 justify-center'>
             <FiFile size={18} />
             <span className='text-sm'>Select PDF</span>
             <input
