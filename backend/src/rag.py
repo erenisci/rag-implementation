@@ -27,7 +27,7 @@ def initialize_chain():
         embedding_function=embedding_model
     )
 
-    retriever = vector_db.as_retriever(search_kwargs={"k": 5})
+    retriever = vector_db.as_retriever(search_type="mmr", search_kwargs={"k": 20, "fetch_k": 100})
     llm = ChatOpenAI(model=settings["MODEL"], api_key=api_key, temperature=0.7)
 
     prompt = ChatPromptTemplate.from_messages(
