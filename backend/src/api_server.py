@@ -24,7 +24,7 @@ class ChatRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    initialize_chain() 
+    initialize_chain()
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -37,6 +37,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.post("/ask/")
 def ask_question_api(data: ChatRequest):
@@ -55,11 +56,13 @@ def ask_question_api(data: ChatRequest):
 
     chat_history.append({"sender": "user", "text": data.question})
 
-    formatted_history = "\n".join([f"{msg['sender']}: {msg['text']}" for msg in chat_history])
+    formatted_history = "\n".join(
+        [f"{msg['sender']}: {msg['text']}" for msg in chat_history])
     full_prompt = f"Previous conversation:\n{formatted_history}\nUser: {data.question}"
 
     if not chain:
-        raise HTTPException(status_code=500, detail="Model initialization failed.")
+        raise HTTPException(
+            status_code=500, detail="Model initialization failed.")
 
     response = chain.invoke({"input": full_prompt})
     answer = response["answer"]
@@ -84,7 +87,8 @@ def get_chats():
     conn = sqlite3.connect(CHAT_HISTORY_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT chat_id, title FROM chats")
-    chats = [{"chat_id": row[0], "title": row[1] or row[0]} for row in cursor.fetchall()]
+    chats = [{"chat_id": row[0], "title": row[1] or row[0]}
+             for row in cursor.fetchall()]
     conn.close()
     return {"chats": chats}
 
@@ -97,7 +101,7 @@ def get_chat_history(chat_id: str):
     cursor.execute("SELECT messages FROM chats WHERE chat_id = ?", (chat_id,))
     chat = cursor.fetchone()
     conn.close()
-    
+
     if chat:
         return {"chat_id": chat_id, "messages": eval(chat[0])}
     else:
@@ -109,8 +113,9 @@ def update_chat_title(chat_id: str, new_title: str):
     """Updates the title of a given chat."""
     conn = sqlite3.connect(CHAT_HISTORY_PATH)
     cursor = conn.cursor()
-    
-    cursor.execute("UPDATE chats SET title = ? WHERE chat_id = ?", (new_title, chat_id))
+
+    cursor.execute("UPDATE chats SET title = ? WHERE chat_id = ?",
+                   (new_title, chat_id))
     conn.commit()
     conn.close()
 
@@ -141,7 +146,7 @@ def update_settings(updated_settings: dict):
     updated_settings["API_KEY"] = updated_settings["API_KEY"].strip()
     updated_settings["MODEL"] = updated_settings["MODEL"].strip()
     updated_settings["SYSTEM_PROMPT"] = updated_settings["SYSTEM_PROMPT"].strip()
-    
+
     save_settings(updated_settings)
     global settings
     settings = load_settings()
@@ -155,7 +160,8 @@ def list_pdfs():
         {
             "name": f,
             "size_mb": round(
-                os.stat(os.path.join(settings["PDF_RAW"], f)).st_size / (1024 * 1024), 2
+                os.stat(os.path.join(
+                    settings["PDF_RAW"], f)).st_size / (1024 * 1024), 2
             ),
         }
         for f in os.listdir(settings["PDF_RAW"])
@@ -201,12 +207,14 @@ def delete_pdf(file_name: str):
     global chain
 
     file_path = os.path.join(settings["PDF_RAW"], file_name)
-    processed_folder = os.path.join(settings["PDF_PROCESSED"], file_name.replace(".pdf", ""))
+    processed_folder = os.path.join(
+        settings["PDF_PROCESSED"], file_name.replace(".pdf", ""))
 
     if os.path.exists(file_path):
         os.remove(file_path)
     else:
-        raise HTTPException(status_code=404, detail="File not found in raw folder")
+        raise HTTPException(
+            status_code=404, detail="File not found in raw folder")
 
     if os.path.exists(processed_folder):
         shutil.rmtree(processed_folder)

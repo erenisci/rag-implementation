@@ -12,7 +12,7 @@ def get_openai_embedding_function():
     if not os.getenv("API_KEY"):
         print("WARNING: No OpenAI API Key provided. Running without OpenAI embeddings.")
         return None
-    
+
     return embedding_functions.OpenAIEmbeddingFunction(api_key=os.getenv("API_KEY"), model_name=settings["EMBEDDING_MODEL"])
 
 
@@ -97,10 +97,11 @@ def delete_pdf_embeddings(pdf_name):
 
         if ids_to_delete:
             vector_db.delete(ids=ids_to_delete)
-            print(f"Deleted {len(ids_to_delete)} embeddings related to {pdf_name}")
+            print(
+                f"Deleted {len(ids_to_delete)} embeddings related to {pdf_name}")
         else:
             print(f"No embeddings found for {pdf_name}")
-            
+
     except Exception as e:
         print(f"Error deleting embeddings for {pdf_name}: {e}")
 
@@ -114,7 +115,7 @@ def reset_chroma_db():
 
     global client, vector_db
     _, vector_db = get_chroma_client()
-    
+
     if vector_db:
         print("ChromaDB reset and collection recreated.")
     else:

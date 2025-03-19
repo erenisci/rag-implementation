@@ -23,9 +23,9 @@ DEFAULT_SETTINGS = {
 def load_settings():
     """Loads the latest configuration from settings.json and .env dynamically."""
     settings = {}
-    
+
     os.makedirs(SETTINGS_DIR, exist_ok=True)
-    
+
     if not os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
             json.dump(DEFAULT_SETTINGS, file, indent=2)
@@ -33,7 +33,7 @@ def load_settings():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, "r", encoding="utf-8") as file:
             settings.update(json.load(file))
-            
+
     if not os.path.exists(ENV_FILE):
         with open(ENV_FILE, "w") as file:
             file.write("API_KEY=")
@@ -59,7 +59,7 @@ def save_settings(new_settings):
 
     if "API_KEY" in env_vars:
         set_key(ENV_FILE, "API_KEY", env_vars["API_KEY"])
-        load_dotenv(override=True) 
+        load_dotenv(override=True)
 
 
 def init_db():
@@ -98,4 +98,4 @@ os.makedirs(settings["PDF_RAW"], exist_ok=True)
 os.makedirs(settings["PDF_PROCESSED"], exist_ok=True)
 os.makedirs(settings["CHROMA_DB_DIR"], exist_ok=True)
 
-init_db()        
+init_db()

@@ -33,7 +33,8 @@ def process_pdf(pdf_name):
     """Processes a PDF file from the raw folder, extracts text, splits it into chunks, and saves the output."""
     pdf_path = os.path.join(settings["PDF_RAW"], pdf_name)
     if not os.path.exists(pdf_path):
-        print(f"Warning: {pdf_name} not found in {settings['PDF_RAW']}. Skipping.")
+        print(
+            f"Warning: {pdf_name} not found in {settings['PDF_RAW']}. Skipping.")
         return
 
     extracted_text = extract_text_from_pdf(pdf_path)
@@ -41,7 +42,8 @@ def process_pdf(pdf_name):
         print(f"Warning: No extractable text found in {pdf_name}. Skipping.")
         return
 
-    text_chunks = split_text_with_langchain(extracted_text, chunk_size=500, overlap=50)
+    text_chunks = split_text_with_langchain(
+        extracted_text, chunk_size=500, overlap=50)
 
     base_filename = pdf_name.replace(".pdf", "")
     pdf_output_dir = os.path.join(settings["PDF_PROCESSED"], base_filename)
@@ -57,7 +59,8 @@ def process_pdf(pdf_name):
 
 def process_all_pdfs():
     """Scans the raw folder and processes all available PDF files."""
-    pdf_files = [f for f in os.listdir(settings["PDF_RAW"]) if f.endswith(".pdf")]
+    pdf_files = [f for f in os.listdir(
+        settings["PDF_RAW"]) if f.endswith(".pdf")]
 
     if not pdf_files:
         print("No PDF files found in the raw folder.")
