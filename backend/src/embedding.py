@@ -126,15 +126,26 @@ def store_embeddings_in_chromadb():
 
 def delete_pdf_embeddings(pdf_name):
     """Deletes all embeddings related to a specific PDF from ChromaDB."""
-    _, collection = get_chroma_client()
-
-    if collection is None:
-        print("ERROR: ChromaDB collection not found. Skipping deletion.")
-        return
-
     try:
-        collection.delete(where={"pdf_name": pdf_name})
-        print(f"Deleted all embeddings related to {pdf_name}")
+        client = chromadb.PersistentClient(path=CHROMA_DB_DIR)
+        collection = client.get_collection(settings["COLLECTION_NAME"])
+
+        all_embeddings = collection.get()
+        ids_to_delete = []
+
+        normalized_pdf_name = pdf_name.replace(".pdf", "").strip().lower()
+        for doc_id, metadata in zip(all_embeddings["ids"], all_embeddings["metadatas"]):
+            meta_pdf_name = metadata.get("pdf_name", "").strip().lower()
+
+            if meta_pdf_name == normalized_pdf_name:
+                ids_to_delete.append(doc_id)
+
+        if ids_to_delete:
+            collection.delete(ids=ids_to_delete)
+            print(
+                f"Deleted {len(ids_to_delete)} embeddings related to {pdf_name}")
+        else:
+            print(f"No embeddings found for {pdf_name}")
 
     except Exception as e:
-        print(f"Error deleting embeddings for {pdf_name}: {e}")
+        print(f"Error deleting embeddings for {pdf_name}: {str(e)}")
