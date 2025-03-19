@@ -20,9 +20,10 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
   const fetchPDFs = async () => {
     try {
       const response = await axios.get('http://127.0.0.1:8000/list-pdfs/');
-      setPdfList(response.data.pdfs);
+      setPdfList(Array.isArray(response.data.pdfs) ? response.data.pdfs : []);
     } catch (error) {
       console.error('Error fetching PDFs:', error);
+      setPdfList([]);
     } finally {
       setLoading(false);
     }
@@ -66,7 +67,8 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
 
   const deletePDF = async (fileName: string) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/delete-pdf/?file_name=${fileName}`);
+      const encodedFileName = encodeURIComponent(fileName);
+      await axios.delete(`http://127.0.0.1:8000/delete-pdf/?pdf_name=${encodedFileName}`);
       alert('File deleted successfully!');
       fetchPDFs();
     } catch (error) {

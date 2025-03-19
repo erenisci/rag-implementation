@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface Settings {
-  API_KEY: string;
+  OPENAI_API_KEY: string;
   MODEL: string;
   SYSTEM_PROMPT: string;
 }
 
 interface SettingsModalProps {
   settings: Settings;
-  setSettings: (settings: { API_KEY: string; MODEL: string; SYSTEM_PROMPT: string }) => void;
+  setSettings: (settings: { OPENAI_API_KEY: string; MODEL: string; SYSTEM_PROMPT: string }) => void;
   setSettingsOpen: (open: boolean) => void;
   fetchSettings: () => Promise<void>;
 }
@@ -31,7 +31,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const updateSettings = async () => {
     try {
       const trimmedSettings = {
-        API_KEY: localSettings.API_KEY.replace(/^\s+|\s+$/g, ''),
+        OPENAI_API_KEY: localSettings.OPENAI_API_KEY.replace(/^\s+|\s+$/g, ''),
         MODEL: localSettings.MODEL.replace(/^\s+|\s+$/g, ''),
         SYSTEM_PROMPT: localSettings.SYSTEM_PROMPT.replace(/^\s+|\s+$/g, ''),
       };
@@ -62,8 +62,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <input
               type={showApiKey ? 'text' : 'password'}
               className='w-full bg-transparent outline-none'
-              value={localSettings.API_KEY}
-              onChange={e => setLocalSettings({ ...localSettings, API_KEY: e.target.value })}
+              value={localSettings.OPENAI_API_KEY}
+              onChange={e => setLocalSettings({ ...localSettings, OPENAI_API_KEY: e.target.value })}
             />
             <button
               onClick={() => setShowApiKey(!showApiKey)}

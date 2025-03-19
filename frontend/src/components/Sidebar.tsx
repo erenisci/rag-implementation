@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* New Chat Button */}
       <button
         onClick={handleNewChat}
-        className='w-36 mt-8 p-2 bg-blue-500 hover:bg-blue-400 transition-all rounded flex items-center justify-center self-center gap-2'
+        className='w-full mt-8 p-2 bg-blue-500 hover:bg-blue-400 transition-all rounded flex items-center justify-center self-center gap-2'
       >
         <FiPlus /> New Chat
       </button>
