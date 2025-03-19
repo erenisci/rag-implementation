@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [chats, setChats] = useState<{ chat_id: string; title: string }[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
-    API_KEY: '',
+    OPENAI_API_KEY: '',
     MODEL: 'gpt-3.5-turbo',
     SYSTEM_PROMPT: '',
   });
@@ -130,7 +130,10 @@ const App: React.FC = () => {
         </div>
 
         {/* Chat Messages */}
-        <ChatMessages messages={messages} />
+        <ChatMessages
+          messages={messages}
+          chatId={activeChat}
+        />
 
         {/* Input Field */}
         <InputField onSendMessage={handleSendMessage} />

@@ -111,7 +111,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
         )}
 
         <div className='mt-4 flex gap-2'>
-          <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 text-white rounded shadow-md tracking-wide cursor-pointer hover:bg-stone-600 justify-center'>
+          <label className='w-1/2 flex items-center gap-2 px-4 py-2 bg-stone-700 transition-all duration-200 rounded shadow-md tracking-wide cursor-pointer hover:bg-stone-600 justify-center'>
             <FiFile size={18} />
             <span className='text-sm'>Select PDF</span>
             <input
@@ -123,7 +123,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
           </label>
           <button
             onClick={handleFileUpload}
-            className='w-1/2 bg-blue-500 hover:bg-blue-400 p-2 rounded flex items-center justify-center gap-2'
+            className='w-1/2 bg-blue-500 hover:bg-blue-400 transition-all duration-200 p-2 rounded flex items-center justify-center gap-2'
             disabled={uploading}
           >
             <FiUploadCloud size={18} />
@@ -133,7 +133,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
 
         <button
           onClick={handleProcessPDFs}
-          className='w-full bg-purple-500 hover:bg-purple-400 mt-2 p-2 rounded flex items-center justify-center gap-2'
+          className='w-full bg-purple-500 hover:bg-purple-400 transition-all duration-200 mt-2 p-2 rounded flex items-center justify-center gap-2'
           disabled={processing}
         >
           <FiRefreshCw size={18} /> {processing ? 'Synchronizing...' : 'Process PDFs'}
@@ -142,7 +142,7 @@ const PDFModal: React.FC<PDFModalProps> = ({ setPdfModalOpen }) => {
         <div className='flex justify-end mt-4'>
           <button
             onClick={() => setPdfModalOpen(false)}
-            className='w-18 bg-red-500 hover:bg-red-400 p-2 rounded'
+            className='w-18 bg-red-500 hover:bg-red-400 transition-all duration-200 p-2 rounded'
           >
             Cancel
           </button>

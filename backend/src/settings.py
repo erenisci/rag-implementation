@@ -9,6 +9,13 @@ SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 ENV_FILE = ".env"
 
 DEFAULT_SETTINGS = {
+    "MODEL": "gpt-3.5-turbo",
+    "SYSTEM_PROMPT": (
+        "You are an AI assistant that answers user questions based on retrieved documents. "
+        "Use the provided document context to generate accurate and relevant answers. "
+        "Do not guess; if you do not have enough information, say 'I have not enough information.'"
+        "Keep responses concise, unless more details are explicitly requested."
+    ),
     "PDF_RAW": "data/raw/",
     "PDF_PROCESSED": "data/processed/",
     "CHROMA_DB_DIR": "data/chroma_db",

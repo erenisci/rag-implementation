@@ -67,7 +67,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             />
             <button
               onClick={() => setShowApiKey(!showApiKey)}
-              className='ml-2 px-2 text-gray-400 hover:text-gray-200'
+              className='ml-2 px-1 text-gray-400 hover:text-gray-200'
             >
               {showApiKey ? <FiEyeOff /> : <FiEye />}
             </button>
@@ -95,13 +95,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className='flex justify-end mt-4'>
           <button
             onClick={() => setSettingsOpen(false)}
-            className='mr-2 w-18 bg-red-500 hover:bg-red-400 p-2 rounded'
+            className='mr-2 w-18 bg-red-500 hover:bg-red-400 transition-all duration-300 p-2 rounded'
           >
             Cancel
           </button>
           <button
             onClick={updateSettings}
-            className='w-18 bg-green-500 hover:bg-green-400 p-2 rounded'
+            className='w-18 bg-green-500 hover:bg-green-400 transition-all duration-300 p-2 rounded'
           >
             Save
           </button>

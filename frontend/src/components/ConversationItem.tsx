@@ -92,7 +92,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
               e.stopPropagation();
               setIsEditing(true);
             }}
-            className='p-1 mr-1 text-stone-500 hover:text-stone-400'
+            className='p-1 mr-1 text-stone-400 hover:text-stone-300'
           >
             <FiEdit size={18} />
           </button>

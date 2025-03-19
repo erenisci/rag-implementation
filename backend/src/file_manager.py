@@ -55,7 +55,7 @@ def upload_pdf(file_path, file_obj):
     try:
         with open(destination_path, "wb") as buffer:
             shutil.copyfileobj(file_obj.file, buffer)
-        print(f"📥 Uploaded {file_name} to {RAW_DIR}")
+        print(f"Uploaded {file_name} to {RAW_DIR}")
     except Exception as e:
         raise RuntimeError(f"Unexpected error while copying file: {str(e)}")
 

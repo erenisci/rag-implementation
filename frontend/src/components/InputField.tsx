@@ -40,7 +40,7 @@ const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
       />
       <button
         onClick={handleSend}
-        className='ml-2 py-2 px-4 rounded transition-all bg-blue-500 hover:bg-blue-400'
+        className='ml-2 py-2 px-4 rounded transition-all duration-200 bg-gray-500 hover:bg-gray-400'
       >
         <LuSendHorizontal size={18} />
       </button>
