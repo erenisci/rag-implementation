@@ -4,7 +4,7 @@ import uuid
 from typing import List, Optional
 from urllib.parse import unquote
 
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.chat_manager import (delete_chat, get_chat_history, list_chats,
@@ -14,7 +14,6 @@ from src.file_manager import delete_pdf, list_pdfs, upload_pdf
 from src.preprocessing import process_all_pdfs
 from src.retrieval import chain, initialize_chain
 from src.settings import load_settings, save_settings, settings
-
 
 app = FastAPI()
 
@@ -36,9 +35,12 @@ class ChatRequest(BaseModel):
 @app.post("/ask/")
 async def ask_ai(data: ChatRequest):
     """Handles user queries and maintains chat history."""
+    global chain
+    chain = initialize_chain()
+
     if not chain:
         raise HTTPException(
-            status_code=500, detail="AI model not initialized. Please set an API key.")
+            status_code=401, detail="Missing or invalid OpenAI API Key. Please provide a valid API key.")
 
     chat_id = data.chat_id or str(uuid.uuid4())
     chat_history = get_chat_history(chat_id)
@@ -111,10 +113,10 @@ async def upload_pdf_api(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(e))
     except PermissionError:
         raise HTTPException(
-            status_code=500, detail="❌ Permission error: Check file system permissions.")
+            status_code=500, detail="Permission error: Check file system permissions.")
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"❌ Unexpected error: {str(e)}")
+            status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 @app.get("/list-pdfs/")

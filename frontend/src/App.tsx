@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { FaBars, FaRegFileAlt } from 'react-icons/fa';
 import { FiSettings } from 'react-icons/fi';
@@ -84,12 +84,17 @@ const App: React.FC = () => {
         setActiveChat(response.data.chat_id);
         fetchChats();
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { text: 'Error getting response from AI.', sender: 'ai' },
-      ]);
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
+
+      console.error('Error sending message:', axiosError);
+
+      const message =
+        axiosError.response?.status === 401
+          ? 'API key not set. Please configure it in settings.'
+          : 'Error getting response from AI.';
+
+      setMessages(prevMessages => [...prevMessages, { text: message, sender: 'ai' }]);
     }
   };
 

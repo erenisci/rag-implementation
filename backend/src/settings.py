@@ -1,5 +1,6 @@
 import json
 import os
+
 from dotenv import load_dotenv, set_key
 
 load_dotenv(override=True)
@@ -11,10 +12,7 @@ ENV_FILE = ".env"
 DEFAULT_SETTINGS = {
     "MODEL": "gpt-3.5-turbo",
     "SYSTEM_PROMPT": (
-        "You are an AI assistant that answers user questions based on retrieved documents. "
-        "Use the provided document context to generate accurate and relevant answers. "
-        "Do not guess; if you do not have enough information, say 'I have not enough information.'"
-        "Keep responses concise, unless more details are explicitly requested."
+        "You are an AI assistant that helps users by answering questions based on uploaded PDF documents. You should use the retrieved document content to provide accurate and helpful answers. If there is not enough information in the documents to answer a question, clearly say: 'I do not have enough information in the documents to answer that.' Keep your responses clear and concise unless the user asks for more detail. For greetings or casual conversation, respond naturally like a helpful assistant."
     ),
     "PDF_RAW": "data/raw/",
     "PDF_PROCESSED": "data/processed/",

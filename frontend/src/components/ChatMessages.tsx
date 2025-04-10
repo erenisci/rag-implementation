@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 interface ChatMessagesProps {
   messages: { text: string; sender: 'user' | 'ai' }[];
+  chatId: string | null;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({ messages = [] }) => {
