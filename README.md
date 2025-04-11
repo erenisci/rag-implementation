@@ -11,6 +11,8 @@ RAG-Implementation is an advanced AI-powered chatbot that uses **Retrieval-Augme
 - **Dynamic chat list**: Automatically updates the sidebar with active chats.
 - **Delete chat support**: Deletes conversations dynamically.
 - **Dark UI theme** for a better user experience.
+- **Responsive Web Design**: Mobile-friendly and accessible from all screen sizes.
+- **Dockerized Deployment**: Easily run with Docker or Docker Compose.
 
 ## Tech Stack
 
@@ -20,7 +22,7 @@ RAG-Implementation is an advanced AI-powered chatbot that uses **Retrieval-Augme
 
 ---
 
-## Installation & Setup
+## Installation & Setup (Local)
 
 ### Clone the Repository
 
@@ -41,14 +43,6 @@ venv\Scripts\activate    # Windows
 pip install -r requirements.txt
 ```
 
-#### Environment Variables
-
-Create a `.env` file inside `backend/` and add the following:
-
-```ini
-API_KEY=your_openai_api_key
-```
-
 ### Frontend Setup
 
 Navigate to the `frontend` directory and install dependencies:
@@ -58,13 +52,15 @@ cd frontend
 npm install
 ```
 
-### Run the Project
+---
+
+## Run the Project
 
 #### Start Backend Server
 
 ```sh
 cd backend
-uvicorn src.api_server:app --reload
+uvicorn src.api:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 #### Start Frontend
@@ -75,6 +71,33 @@ npm run dev
 ```
 
 The frontend will be available at `http://localhost:5173`
+
+---
+
+## Docker Setup
+
+#### 1. Build and Start with Docker Compose
+
+```sh
+docker compose up --build
+```
+
+#### 2. Access the App
+
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000
+
+#### Optional: Pull from Docker Hub
+
+```sh
+docker pull <your_dockerhub_username>/rag-backend:latest
+docker pull <your_dockerhub_username>/rag-frontend:latest
+```
+
+```sh
+docker run -d -p 8000:8000 <your_dockerhub_username>/rag-backend:latest
+docker run -d -p 3000:3000 <your_dockerhub_username>/rag-frontend:latest
+```
 
 ---
 
@@ -112,3 +135,7 @@ Contributions are welcome! If you'd like to improve the project, feel free to op
 ## License
 
 This project is licensed under the **MIT License**.
+
+```
+
+```
