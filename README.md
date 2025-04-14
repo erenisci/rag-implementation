@@ -1,6 +1,6 @@
-# RAG-Implementation
+# AI-Docs
 
-RAG-Implementation is an advanced AI-powered chatbot that uses **Retrieval-Augmented Generation (RAG)** to answer user queries based on stored PDF documents. The chatbot integrates **FastAPI** for the backend and **React (Vite)** for the frontend.
+AI-Docs is an advanced AI-powered chatbot that uses **Retrieval-Augmented Generation (RAG)** to answer user queries based on stored PDF documents. The chatbot integrates **FastAPI** for the backend and **React (Vite)** for the frontend.
 
 ## Features
 
@@ -38,8 +38,10 @@ Navigate to the `backend` directory and install dependencies:
 ```sh
 cd backend
 python -m venv venv
+
 source venv/bin/activate  # MacOS/Linux
 venv\Scripts\activate    # Windows
+
 pip install -r requirements.txt
 ```
 
@@ -90,13 +92,13 @@ docker compose up --build
 #### Optional: Pull from Docker Hub
 
 ```sh
-docker pull <your_dockerhub_username>/rag-backend:latest
-docker pull <your_dockerhub_username>/rag-frontend:latest
+docker pull erenisci/rag-implementation:backend
+docker pull erenisci/rag-implementation:frontend
 ```
 
 ```sh
-docker run -d -p 8000:8000 <your_dockerhub_username>/rag-backend:latest
-docker run -d -p 3000:3000 <your_dockerhub_username>/rag-frontend:latest
+docker run -d -p 8000:8000 erenisci/rag-implementation:backend
+docker run -d -p 3000:3000 erenisci/rag-implementation:frontend
 ```
 
 ---
