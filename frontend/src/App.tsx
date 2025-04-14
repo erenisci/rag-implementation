@@ -98,6 +98,23 @@ const App: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <div className='flex h-screen bg-stone-900 text-stone-200 font-roboto'>
       <Sidebar
@@ -108,11 +125,15 @@ const App: React.FC = () => {
         chats={chats}
         fetchChats={fetchChats}
       />
-      <div className='flex-1 flex flex-col'>
+      <div
+        className={`flex-1 flex flex-col md:w-[75%] ${
+          sidebarOpen && window.innerWidth < 768 ? 'hidden' : 'block'
+        }`}
+      >
         {/* Header */}
         <div className='flex justify-between items-center bg-stone-800 p-4 text-stone-200'>
           <button
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => setSidebarOpen(e => !e)}
             className='p-1.5 rounded-lg transition-all duration-200 hover:bg-stone-700'
           >
             {!sidebarOpen ? <FaBars size={18} /> : ' '}

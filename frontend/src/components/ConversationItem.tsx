@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { FiEdit, FiSave, FiTrash } from 'react-icons/fi';
+import useWindowWidth from '../hooks/useWindowWidth';
 
 interface ConversationItemProps {
   chat_id: string;
@@ -21,6 +22,22 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(title || chat_id);
+
+  const width = useWindowWidth();
+
+  let maxTitleLength = 21;
+  if (width < 1400) maxTitleLength = 19;
+  if (width < 1300) maxTitleLength = 17;
+  if (width < 1200) maxTitleLength = 15;
+  if (width < 1100) maxTitleLength = 13;
+  if (width < 1010) maxTitleLength = 11;
+  if (width < 920) maxTitleLength = 9;
+  if (width < 830) maxTitleLength = 7;
+
+  if (width < 768) maxTitleLength = 21;
+
+  const displayTitle =
+    newTitle.length > maxTitleLength ? newTitle.slice(0, maxTitleLength).trim() + '...' : newTitle;
 
   const deleteChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -54,7 +71,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 
   return (
     <li
-      className={`flex justify-between items-center p-2 rounded cursor-pointer transition-all ${
+      className={`flex justify-between items-center p-2 rounded cursor-pointer transition-all w-[28rem] md:max-w-[28rem] md:w-full ${
         activeChat === chat_id ? 'bg-stone-700' : 'hover:bg-stone-700'
       }`}
       onClick={() => !isEditing && onSelect(chat_id)}
@@ -74,7 +91,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
           className='cursor-pointer flex-grow'
           onDoubleClick={() => setIsEditing(true)}
         >
-          {newTitle.length > 18 ? newTitle.slice(0, 18).trim() + '...' : newTitle}
+          {displayTitle}
         </span>
       )}
 

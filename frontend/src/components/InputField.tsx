@@ -23,7 +23,7 @@ const InputField: React.FC<InputFieldProps> = ({ onSendMessage }) => {
   };
 
   return (
-    <div className='p-4 bg-stone-800 flex items-center text-stone-100 mb-10 mx-10 rounded w-[50rem] self-center'>
+    <div className='p-4 bg-stone-800 flex items-center text-stone-100 mb-10 mx-10 rounded w-[25rem] lg:w-[37rem] md:w-[31rem] sm:w-[31rem] self-center'>
       <textarea
         ref={textareaRef}
         placeholder='Type a message...'

@@ -13,7 +13,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages = [] }) => {
   }, [messages]);
 
   return (
-    <div className='flex-1 flex flex-col overflow-y-auto py-8 px-16 space-y-4 text-gray-200'>
+    <div className='flex-1 flex flex-col overflow-y-auto px-[6%] sm:px-[8%] md:px-[6%] lg:px-[10%] xl:px-[14%] 2xl:px-[18%] my-8 space-y-4 text-gray-200 items-center w-full self-center'>
       {messages.length === 0 && <p className='text-center text-stone-400'>No messages yet.</p>}
       {messages.map((msg, index) => (
         <div
