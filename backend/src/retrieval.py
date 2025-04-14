@@ -19,7 +19,7 @@ STATIC_PROMPT = (
     "Do NOT rely on your general knowledge, external sources, or assumptions. "
     "If the document does not contain enough information to answer a question, say: "
     "'I do not have enough information in the documents to answer that.' "
-    "You may respond naturally and politely to casual conversations like greetings, but all factual answers must come strictly from the documents."
+    "You may respond naturally and politely to casual conversations like greetings."
 )
 
 
