@@ -78,27 +78,39 @@ The frontend will be available at `http://localhost:5173`
 
 ## Docker Setup
 
-#### 1. Build and Start with Docker Compose
+### Option 1: Build Locally with Docker Compose
 
 ```sh
-docker compose up --build
+docker-compose -f docker-compose.build.yml up --build -d
 ```
 
-#### 2. Access the App
+#### Access the App
 
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000
 
-#### Optional: Pull from Docker Hub
+---
+
+### Option 2: Use Prebuilt Docker Images
+
+#### a. Pull from Docker Hub
 
 ```sh
 docker pull erenisci/rag-implementation:backend
 docker pull erenisci/rag-implementation:frontend
 ```
 
+#### b. Run Using Docker Compose (Recommended)
+
+```sh
+docker-compose -f docker-compose.image.yml up -d
+```
+
+#### Alternatively: Run Containers Manually
+
 ```sh
 docker run -d -p 8000:8000 erenisci/rag-implementation:backend
-docker run -d -p 3000:3000 erenisci/rag-implementation:frontend
+docker run -d -p 5173:3000 erenisci/rag-implementation:frontend
 ```
 
 ---
