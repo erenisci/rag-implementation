@@ -86,7 +86,7 @@ docker-compose -f docker-compose.build.yml up --build -d
 
 #### Access the App
 
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:5173
 - Backend: http://localhost:8000
 
 ---
