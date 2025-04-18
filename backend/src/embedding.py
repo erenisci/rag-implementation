@@ -16,8 +16,6 @@ CHROMA_DB_DIR = settings["CHROMA_DB_DIR"]
 COLLECTION_NAME = settings["COLLECTION_NAME"]
 EMBEDDING_MODEL = settings["EMBEDDING_MODEL"]
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 
 def reset_chroma_db():
     """Resets ChromaDB by deleting and recreating the database directory."""
@@ -32,6 +30,8 @@ def reset_chroma_db():
 
 def get_openai_embedding_function():
     """Returns the OpenAI embedding function if API key exists, otherwise None."""
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
     if not OPENAI_API_KEY:
         print("WARNING: No OpenAI API Key provided. Running without OpenAI embeddings.")
         return None
